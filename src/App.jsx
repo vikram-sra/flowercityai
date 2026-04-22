@@ -94,17 +94,37 @@ function useTypewriter(phrases, typingSpeed = 40, deletingSpeed = 35, pauseDurat
    Mouse position hook for parallax
 ───────────────────────────────────────────── */
 function useMouseParallax(intensity = 0.02) {
-  const [offset, setOffset] = useState({ x: 0, y: 0 });
+  const offset = useRef({ x: 0, y: 0 });
+  const rafId = useRef(null);
+  const [, forceRender] = useState(0);
+
   useEffect(() => {
+    let latestX = 0;
+    let latestY = 0;
+    let ticking = false;
+
     const handler = (e) => {
-      const x = (e.clientX - window.innerWidth / 2) * intensity;
-      const y = (e.clientY - window.innerHeight / 2) * intensity;
-      setOffset({ x, y });
+      latestX = (e.clientX - window.innerWidth / 2) * intensity;
+      latestY = (e.clientY - window.innerHeight / 2) * intensity;
+
+      if (!ticking) {
+        ticking = true;
+        rafId.current = requestAnimationFrame(() => {
+          offset.current = { x: latestX, y: latestY };
+          forceRender(n => n + 1);
+          ticking = false;
+        });
+      }
     };
-    window.addEventListener('mousemove', handler);
-    return () => window.removeEventListener('mousemove', handler);
+
+    window.addEventListener('mousemove', handler, { passive: true });
+    return () => {
+      window.removeEventListener('mousemove', handler);
+      if (rafId.current) cancelAnimationFrame(rafId.current);
+    };
   }, [intensity]);
-  return offset;
+
+  return offset.current;
 }
 
 /* ─────────────────────────────────────────────
@@ -1162,7 +1182,7 @@ export default function App() {
 
           {/* Desktop links */}
           <nav className="hidden md:flex items-center gap-6">
-            {['#process|How It Works', '#why|Why AI', '#services|Services', '#custom|Custom Solutions', '#faq|FAQ'].map(item => {
+            {['#why|Why AI', '#process|How It Works', '#services|Services', '#faq|FAQ'].map(item => {
               const [href, label] = item.split('|');
               return (
                 <a key={href} href={href} className="font-bold text-sm text-white/70 hover:text-white transition-colors duration-200 relative group">
@@ -1190,7 +1210,7 @@ export default function App() {
         <div className={`md:hidden overflow-hidden transition-all duration-400 ${menuOpen ? 'max-h-96' : 'max-h-0'}`}
           style={{ backgroundColor: '#0F172A' }}>
           <div className="px-5 pb-5 flex flex-col gap-3">
-            {['#process|How It Works', '#why|Why AI', '#services|Services', '#custom|Custom Solutions', '#faq|FAQ'].map(item => {
+            {['#why|Why AI', '#process|How It Works', '#services|Services', '#faq|FAQ'].map(item => {
               const [href, label] = item.split('|');
               return <a key={href} href={href} onClick={() => setMenuOpen(false)} className="font-bold text-white/80 py-2">{label}</a>;
             })}
@@ -1337,45 +1357,16 @@ export default function App() {
         </div>
       </section>
 
-      {/* ══════ TICKER TAPE ══════ */}
-      <div className="overflow-hidden py-3.5" style={{ backgroundColor: '#FCD34D', borderBottom: '3px solid #0F172A' }}>
-        <div className="flex gap-10 animate-marquee whitespace-nowrap">
-          {[...TICKER, ...TICKER].map((item, i) => (
-            <span key={i} className="font-display text-2xl shrink-0" style={{ color: '#0F172A' }}>{item}</span>
-          ))}
-        </div>
-      </div>
-
-      {/* ══════ STATS ══════ */}
-      <section className="py-16 bg-white" style={{ borderBottom: '3px solid #e5e7eb' }}>
-        <div className="max-w-3xl mx-auto px-5 grid grid-cols-1 sm:grid-cols-3 gap-10">
-          <StatBlock emoji="⏱️" value="20hrs" label="Saved per week" delay={0} color="#1D4ED8" />
-          <StatBlock emoji="📞" value="Free" label="30-min discovery call" delay={100} color="#16A34A" />
-          <StatBlock emoji="🚀" value="60 days" label="To first results" delay={200} color="#F97316" />
-        </div>
-      </section>
+      {/* ══════ YOUR BUSINESS IS BLEEDING MONEY ══════ */}
+      <MoneyOnTable />
 
       {/* ══════ ROI CALCULATOR ══════ */}
       <ROICalculator />
 
-      {/* ══════ SEE WHAT YOU NEED ══════ */}
-      <SeeWhatYouNeed />
-
       {/* ══════ HOW IT WORKS ══════ */}
       <HowItWorks />
 
-      {/* ══════ YOUR BUSINESS IS BLEEDING MONEY (was "Why AI") ══════ */}
-      <MoneyOnTable />
-
-      {/* ══════ MONEY LEAKING AUDIT ══════ */}
-      <section className="bg-brand-navy py-20 px-5">
-        <MoneyLeakingAudit />
-      </section>
-
-
-
       {/* ══════ SERVICES ══════ */}
-
       <section id="services" className="py-24 px-5">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-14">
@@ -1390,7 +1381,7 @@ export default function App() {
             <p className="font-body text-gray-500 mt-4 text-lg">Click any card to expand.</p>
           </div>
 
-          <div className="flex flex-col gap-5">
+          <div className="flex flex-col gap-5 mb-14">
             <ServiceCard index={0} num="01" icon="🔍" tag="Start Here" sub="The Digital Soil Test" title="AI Readiness Audit" bgColor="#1D4ED8"
               desc="We review your software, workflows, and pain points. You get a plain-English 'AI Roadmap' showing exactly what to fix and what to automate."
               outcome="Custom AI Roadmap Report" />
@@ -1404,74 +1395,17 @@ export default function App() {
               desc="On-site or virtual workshops. Your staff learn ChatGPT, Gemini, and Copilot for daily tasks — not theory, just real results."
               outcome="Faster output, less busywork" />
           </div>
-        </div>
-      </section>
 
-
-      {/* ══════ CUSTOM SOLUTIONS ══════ */}
-      <section id="custom" className="py-28 px-5 overflow-hidden relative" style={{ backgroundColor: '#0F172A' }}>
-        {/* Background decorative elements */}
-        <div className="absolute top-0 right-0 w-[500px] h-[500px] rounded-full opacity-5 pointer-events-none translate-x-1/2 -translate-y-1/2" style={{ backgroundColor: '#FCD34D' }} />
-        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] rounded-full opacity-5 pointer-events-none -translate-x-1/2 translate-y-1/2" style={{ backgroundColor: '#1D4ED8' }} />
-
-        <div className="relative max-w-6xl mx-auto">
-          {/* Top label + headline */}
-          <div className="text-center mb-16">
-            <span className="inline-block font-black text-xs uppercase tracking-widest px-4 py-2 rounded-full mb-6"
-              style={{ backgroundColor: '#FCD34D', color: '#0F172A' }}>
-              ✦ Custom Solutions
-            </span>
-            <h2 className="font-display text-5xl md:text-7xl text-white leading-none mb-6">
-              THE FUTURE IS<br />
-              <span style={{ color: '#FCD34D' }}>ALREADY HERE.</span><br />
-              ARE YOU IN IT?
-            </h2>
-            <p className="font-body text-white/60 text-lg md:text-xl max-w-2xl mx-auto leading-relaxed">
-              Every business is different. Cookie-cutter software wasn't built for you.
-              We design AI solutions from scratch — tailored to <em>your</em> workflows, <em>your</em> team, and <em>your</em> customers.
-            </p>
-          </div>
-
-          {/* Feature grid */}
-          <div className="grid md:grid-cols-3 gap-5 mb-12">
-            {[
-              {
-                icon: '🧩',
-                title: 'Built Around You',
-                desc: 'No off-the-shelf templates. We map your exact processes, find the friction, and build AI that slots right in — zero disruption to your team.',
-                border: '#FCD34D',
-              },
-              {
-                icon: '📈',
-                title: 'Grows With You',
-                desc: 'Start small, scale fast. Your custom solution expands as your business does — adding new automations, new AI agents, and new integrations on demand.',
-                border: '#1D4ED8',
-              },
-              {
-                icon: '🛡️',
-                title: 'Yours to Keep',
-                desc: 'You own everything we build. No vendor lock-in, no mystery subscription fees. Your AI works for you — not the other way around.',
-                border: '#16A34A',
-              },
-            ].map((card, i) => (
-              <div key={i} className="glass-card rounded-2xl p-8 hover:-translate-y-2 transition-all duration-300">
-                <div className="text-5xl mb-4">{card.icon}</div>
-                <h3 className="font-display text-3xl mb-3" style={{ color: card.border }}>{card.title}</h3>
-                <p className="font-body text-white/60 text-sm leading-relaxed">{card.desc}</p>
-              </div>
-            ))}
-          </div>
-
-          {/* Big callout strip */}
+          {/* Urgency CTA strip — merged from Custom Solutions */}
           <div className="rounded-3xl p-8 md:p-12 text-center md:text-left flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden"
             style={{ backgroundColor: '#FCD34D' }}>
             <div className="absolute -right-16 -bottom-16 w-52 h-52 rounded-full opacity-20 pointer-events-none" style={{ backgroundColor: '#F97316' }} />
             <div className="relative z-10">
               <p className="font-display text-4xl md:text-5xl text-brand-navy leading-tight mb-2">
-                THE BUSINESSES THAT ADOPT AI NOW<br className="hidden md:block" /> WILL DOMINATE THE NEXT DECADE.
+                EVERY SOLUTION IS<br className="hidden md:block" /> BUILT AROUND YOU.
               </p>
               <p className="font-body text-brand-navy/70 text-base">
-                Don't wait until your competitors already have the advantage.
+                No cookie-cutter templates. No vendor lock-in. Your AI, your rules.
               </p>
             </div>
             <a href="#contact"
@@ -1483,6 +1417,8 @@ export default function App() {
         </div>
       </section>
 
+      {/* ══════ SEE WHAT YOU NEED ══════ */}
+      <SeeWhatYouNeed />
 
       {/* ══════ FAQ ══════ */}
       <FAQ />
@@ -1605,7 +1541,7 @@ export default function App() {
             </div>
           </div>
           <nav className="flex flex-wrap justify-center gap-6">
-            {[['#process', 'How It Works'], ['#why', 'Why AI'], ['#services', 'Services'], ['#roi', 'ROI'], ['#faq', 'FAQ'], ['#contact', 'Contact']].map(([href, label]) => (
+            {[['#why', 'Why AI'], ['#process', 'How It Works'], ['#services', 'Services'], ['#faq', 'FAQ'], ['#contact', 'Contact']].map(([href, label]) => (
               <a key={href} href={href} className="font-bold text-sm text-white/60 hover:text-white transition-colors">{label}</a>
             ))}
           </nav>

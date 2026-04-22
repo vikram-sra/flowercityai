@@ -106,10 +106,10 @@ body {
 .animate-fade-up   { animation: fadeUp 0.6s ease both; }
 .animate-pop-in    { animation: popIn 0.5s cubic-bezier(.34,1.56,.64,1) both; }
 .animate-marquee   { animation: marquee 30s linear infinite; }
-.animate-float     { animation: float 4s ease-in-out infinite; }
+.animate-float     { animation: float 4s ease-in-out infinite; will-change: transform; }
 .animate-pulse-ring{ animation: pulse-ring 2s ease-in-out infinite; }
 .animate-shimmer   { animation: shimmer 3s linear infinite; }
-.animate-glow      { animation: glow-pulse 3s ease-in-out infinite; }
+.animate-glow      { animation: glow-pulse 3s ease-in-out infinite; will-change: transform, opacity; }
 .animate-bounce-subtle { animation: bounce-subtle 2s ease-in-out infinite; }
 
 /* stagger helpers */
@@ -134,6 +134,8 @@ body {
   pointer-events: none;
   animation: hero-float-1 var(--duration) ease-in-out infinite;
   animation-delay: var(--delay);
+  will-change: transform;
+  backface-visibility: hidden;
 }
 .hero-particle:nth-child(even) {
   animation-name: hero-float-2;
@@ -165,6 +167,7 @@ body {
   -webkit-text-fill-color: transparent;
   background-clip: text;
   animation: gradient-shift 4s linear infinite;
+  will-change: background-position;
 }
 .gradient-text-blue {
   background: linear-gradient(135deg, #60A5FA 0%, #3B82F6 50%, #818CF8 100%);
