@@ -1136,6 +1136,29 @@ export default function App() {
   const [heroLoaded, setHeroLoaded] = useState(false);
   const mouseOffset = useMouseParallax(0.015);
 
+  const handleFormSubmit = (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    
+    const googleFormData = new FormData();
+    googleFormData.append('entry.1395438875', formData.get('name'));
+    googleFormData.append('entry.899738670', formData.get('business'));
+    googleFormData.append('entry.873934759', formData.get('email'));
+    googleFormData.append('entry.343597103', formData.get('phone') || '');
+    googleFormData.append('entry.349162794', formData.get('industry'));
+    googleFormData.append('entry.913858987', formData.get('pain_point'));
+
+    fetch('https://docs.google.com/forms/d/e/1FAIpQLSdFKWq1ojAeCN217B0BKPIlvlt4LUUxuhxf0WmGqXTq5eNVaQ/formResponse', {
+      method: 'POST',
+      mode: 'no-cors',
+      body: googleFormData
+    }).then(() => {
+      setSubmitted(true);
+    }).catch(() => {
+      setSubmitted(true); 
+    });
+  };
+
   const typedText = useTypewriter([
     'save upto 20 hours a week.',
     'automate its busywork.',
@@ -1448,9 +1471,7 @@ export default function App() {
             </div>
           ) : (
             <form
-              action="https://formspree.io/f/YOUR_FORM_ID"
-              method="POST"
-              onSubmit={(e) => { e.preventDefault(); setSubmitted(true); }}
+              onSubmit={handleFormSubmit}
               className="bg-white rounded-3xl p-8 md:p-10"
               style={{ border: '4px solid #0F172A', boxShadow: '6px 6px 0 #0F172A' }}
             >
