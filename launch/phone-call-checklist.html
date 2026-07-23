@@ -1,0 +1,303 @@
+<title>Flower City AI — Discovery Call Checklist</title>
+<style>
+  :root {
+    --bg: #f4f5fa;
+    --surface: #ffffff;
+    --surface-2: #f7f8fd;
+    --ink: #141726;
+    --muted: #585f78;
+    --faint: #8b91a8;
+    --line: #e7e8f1;
+    --line-strong: #d4d6e6;
+    --accent: #4f46e5;
+    --accent-soft: #eeecfb;
+    --good: #12894a;
+    --bad: #c0392b;
+    --shadow: 0 1px 2px rgba(20,23,38,.05), 0 10px 28px rgba(20,23,38,.07);
+    --font-body: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#0b0d18; --surface:#151827; --surface-2:#11131f; --ink:#eef0f8; --muted:#9ca3bd; --faint:#646a83;
+      --line:#242739; --line-strong:#333752; --accent:#8b83f5; --accent-soft:#1b1930; --good:#3ec574; --bad:#e06a5c;
+      --shadow:0 1px 2px rgba(0,0,0,.35), 0 12px 32px rgba(0,0,0,.45); }
+  }
+  :root[data-theme="light"] { --bg:#f4f5fa; --surface:#fff; --surface-2:#f7f8fd; --ink:#141726; --muted:#585f78; --faint:#8b91a8; --line:#e7e8f1; --line-strong:#d4d6e6; --accent:#4f46e5; --accent-soft:#eeecfb; --good:#12894a; --bad:#c0392b; --shadow:0 1px 2px rgba(20,23,38,.05), 0 10px 28px rgba(20,23,38,.07); }
+  :root[data-theme="dark"] { --bg:#0b0d18; --surface:#151827; --surface-2:#11131f; --ink:#eef0f8; --muted:#9ca3bd; --faint:#646a83; --line:#242739; --line-strong:#333752; --accent:#8b83f5; --accent-soft:#1b1930; --good:#3ec574; --bad:#e06a5c; --shadow:0 1px 2px rgba(0,0,0,.35), 0 12px 32px rgba(0,0,0,.45); }
+
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font-body); line-height: 1.55; -webkit-font-smoothing: antialiased; }
+  .wrap { max-width: 840px; margin: 0 auto; padding: 30px 20px 80px; }
+  .display { font-weight: 800; letter-spacing: -.015em; text-wrap: balance; }
+
+  header { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; justify-content: space-between; }
+  .brand { display: flex; align-items: center; gap: 12px; }
+  .mark { width: 42px; height: 42px; border-radius: 11px; background: var(--accent); color: #fff; display: grid; place-items: center; font-weight: 800; font-size: 17px; flex: none; }
+  .brand h1 { margin: 0; font-size: 15px; font-weight: 800; letter-spacing: .02em; line-height: 1.1; }
+  .brand span { color: var(--muted); font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
+  .btn { font-family: inherit; font-size: 12.5px; font-weight: 700; color: var(--ink); background: var(--surface); border: 1px solid var(--line-strong); border-radius: 9px; padding: 8px 13px; cursor: pointer; }
+  .btn:hover { border-color: var(--accent); }
+  .btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .hero { margin: 26px 0 26px; }
+  .kicker { color: var(--accent); font-weight: 800; font-size: 12px; letter-spacing: .16em; text-transform: uppercase; }
+  .hero h2 { font-size: clamp(26px, 5.5vw, 40px); line-height: 1.05; margin: 10px 0 14px; }
+  .hero p { color: var(--muted); font-size: 15.5px; max-width: 64ch; margin: 0; }
+
+  h3.sec { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); font-weight: 800; margin: 0 0 4px; display: flex; align-items: center; gap: 10px; }
+  .sec .rule { flex: 1; height: 1px; background: var(--line); }
+  .block { margin: 30px 0; }
+  .block > .lead { color: var(--muted); font-size: 14px; margin: 4px 0 16px; }
+
+  .items { display: flex; flex-direction: column; gap: 8px; }
+  .item { display: grid; grid-template-columns: 24px 1fr; gap: 13px; align-items: start; background: var(--surface); border: 1px solid var(--line); border-radius: 11px; padding: 13px 15px; cursor: pointer; transition: border-color .15s, background .15s; }
+  .item:hover { border-color: var(--line-strong); background: var(--surface-2); }
+  .item:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .ck { width: 21px; height: 21px; border-radius: 6px; border: 2px solid var(--line-strong); margin-top: 1px; display: grid; place-items: center; flex: none; transition: background .15s, border-color .15s; }
+  .ck svg { width: 12px; height: 12px; opacity: 0; transform: scale(.5); transition: .15s; }
+  .item[data-done="1"] .ck { background: var(--accent); border-color: var(--accent); }
+  .item[data-done="1"] .ck svg { opacity: 1; transform: scale(1); }
+  .item[data-done="1"] .title { color: var(--muted); }
+  .title { font-weight: 700; font-size: 14.5px; }
+  .num { display: inline-grid; place-items: center; width: 20px; height: 20px; border-radius: 6px; background: var(--accent-soft); color: var(--accent); font-size: 12px; font-weight: 800; margin-right: 8px; vertical-align: 1px; }
+  .secs { color: var(--faint); font-weight: 600; font-size: 12px; margin-left: 6px; }
+  .say { margin-top: 8px; border-left: 3px solid var(--accent); background: var(--accent-soft); border-radius: 0 8px 8px 0; padding: 8px 12px; font-size: 13.5px; color: var(--ink); }
+  .say em { display: block; font-style: normal; font-weight: 800; font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); margin-bottom: 3px; }
+
+  .qbank { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 8px 20px; box-shadow: var(--shadow); }
+  ul.q { list-style: none; padding: 0; margin: 0; }
+  ul.q li { padding: 12px 0 12px 26px; position: relative; font-size: 14.5px; border-bottom: 1px solid var(--line); }
+  ul.q li:last-child { border-bottom: none; }
+  ul.q li::before { content: "?"; position: absolute; left: 0; top: 11px; width: 18px; height: 18px; border-radius: 50%; background: var(--accent-soft); color: var(--accent); font-size: 11px; font-weight: 800; display: grid; place-items: center; }
+
+  .obj { display: flex; flex-direction: column; gap: 12px; }
+  .obj .o { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 15px 17px; box-shadow: var(--shadow); }
+  .obj .q2 { font-weight: 800; font-size: 14.5px; margin-bottom: 7px; }
+  .obj .q2::before { content: "“"; color: var(--accent); font-weight: 800; }
+  .obj .q2::after { content: "”"; color: var(--accent); font-weight: 800; }
+  .obj .a { color: var(--muted); font-size: 14px; }
+  .obj .a b { color: var(--ink); }
+
+  .dd { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 620px) { .dd { grid-template-columns: 1fr; } }
+  .dd .col { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 18px 20px; box-shadow: var(--shadow); }
+  .dd h4 { margin: 0 0 12px; font-size: 14px; font-weight: 800; display: flex; align-items: center; gap: 8px; }
+  .dd .do h4 { color: var(--good); }
+  .dd .dont h4 { color: var(--bad); }
+  ul.clean { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 9px; }
+  ul.clean li { padding-left: 22px; position: relative; font-size: 13.8px; }
+  ul.clean li::before { content: ""; position: absolute; left: 3px; top: 7px; width: 7px; height: 7px; border-radius: 50%; }
+  .do li::before { background: var(--good); }
+  .dont li::before { background: var(--bad); }
+
+  footer { margin-top: 34px; padding-top: 18px; border-top: 1px solid var(--line); color: var(--faint); font-size: 12.5px; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+  @media print { .btn { display: none; } .item, .o, .col { break-inside: avoid; } body { background: #fff; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <div class="mark">AI</div>
+      <div>
+        <h1>FLOWER CITY AI</h1>
+        <span>Discovery Call Checklist</span>
+      </div>
+    </div>
+    <div style="display:flex; gap:8px;">
+      <button class="btn" id="themeBtn" type="button">◐ Theme</button>
+      <button class="btn" id="resetBtn" type="button">Reset ticks</button>
+      <button class="btn" id="printBtn" type="button">Print</button>
+    </div>
+  </header>
+
+  <div class="hero">
+    <span class="kicker">Your 30-minute discovery call</span>
+    <h2 class="display">Listen first. Lead with the grant. Close to one next step.</h2>
+    <p>Keep this open during the call and tick as you go. The goal isn't to sell — it's to understand their problem, see if they qualify for funding, and agree on a single, specific next step. Aim to talk 30%, listen 70%.</p>
+  </div>
+
+  <!-- BEFORE -->
+  <div class="block">
+    <h3 class="sec">Before you dial <span class="rule"></span></h3>
+    <div class="items">
+      <div class="item" role="checkbox" tabindex="0"><div class="ck"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6"/></svg></div><div><div class="title">Re-read their form answer + business name — jot 1–2 notes</div></div></div>
+      <div class="item" role="checkbox" tabindex="0"><div class="ck"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6"/></svg></div><div><div class="title">Have your calendar, a notepad, and the Product Ladder open</div></div></div>
+      <div class="item" role="checkbox" tabindex="0"><div class="ck"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6"/></svg></div><div><div class="title">Silence notifications. Stand up, smile — it carries down the line</div></div></div>
+    </div>
+  </div>
+
+  <!-- THE CALL -->
+  <div class="block">
+    <h3 class="sec">On the call — the flow <span class="rule"></span></h3>
+    <p class="lead">The numbers are the order. Don't rush steps 4–5 — that's where the whole call is won.</p>
+    <div class="items">
+
+      <div class="item" role="checkbox" tabindex="0"><div class="ck"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6"/></svg></div><div>
+        <div class="title"><span class="num">1</span>Warm open<span class="secs">~30 sec</span></div>
+        <div class="say"><em>Say</em>"Hi [name], it's [you] from Flower City AI — thanks for booking. Did I catch you at an OK time?"</div>
+      </div></div>
+
+      <div class="item" role="checkbox" tabindex="0"><div class="ck"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6"/></svg></div><div>
+        <div class="title"><span class="num">2</span>Set the frame — take the pressure off</div>
+        <div class="say"><em>Say</em>"This is just a no-pressure chat. I want to understand your business and give you a straight read on whether AI can help — even if we never work together. Sound good?"</div>
+      </div></div>
+
+      <div class="item" role="checkbox" tabindex="0"><div class="ck"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6"/></svg></div><div>
+        <div class="title"><span class="num">3</span>Drop the grant hook early</div>
+        <div class="say"><em>Say</em>"Quick heads-up before we dig in — a lot of what we do can be part-funded by Ontario grants. I'll flag it if you qualify."</div>
+      </div></div>
+
+      <div class="item" role="checkbox" tabindex="0"><div class="ck"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6"/></svg></div><div>
+        <div class="title"><span class="num">4</span>Discover — then be quiet and listen<span class="secs">most of the call</span></div>
+        <div class="say"><em>Say</em>"Walk me through a normal day — where does your time actually go?" Then let them talk. Follow their thread, don't jump to solutions.</div>
+      </div></div>
+
+      <div class="item" role="checkbox" tabindex="0"><div class="ck"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6"/></svg></div><div>
+        <div class="title"><span class="num">5</span>Quantify the pain — get a number</div>
+        <div class="say"><em>Say</em>"Roughly how many hours a week does that eat?" … "And what would you guess that's costing you?"</div>
+      </div></div>
+
+      <div class="item" role="checkbox" tabindex="0"><div class="ck"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6"/></svg></div><div>
+        <div class="title"><span class="num">6</span>Quietly qualify for grants (see checklist below)</div>
+        <div class="say"><em>Say</em>"Just so I know what funding might apply — you're a for-profit here in Ontario, and under 50 staff, right?"</div>
+      </div></div>
+
+      <div class="item" role="checkbox" tabindex="0"><div class="ck"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6"/></svg></div><div>
+        <div class="title"><span class="num">7</span>Reflect it back + bridge</div>
+        <div class="say"><em>Say</em>"So if I've got it right, [pain] is costing you about [X] a week. Here's how I'd approach it…"</div>
+      </div></div>
+
+      <div class="item" role="checkbox" tabindex="0"><div class="ck"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6"/></svg></div><div>
+        <div class="title"><span class="num">8</span>Recommend the easy first step (not everything)</div>
+        <div class="say"><em>Say</em>"I wouldn't start big. The right first move is [AI training / a readiness audit] — low cost, low risk, and it's the piece grant funding attaches to."</div>
+      </div></div>
+
+      <div class="item" role="checkbox" tabindex="0"><div class="ck"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6"/></svg></div><div>
+        <div class="title"><span class="num">9</span>Set honest expectations on the grant</div>
+        <div class="say"><em>Say</em>"I can't promise approval — funding's limited and first-come. What I can do is build you the strongest case and handle the paperwork."</div>
+      </div></div>
+
+      <div class="item" role="checkbox" tabindex="0"><div class="ck"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6"/></svg></div><div>
+        <div class="title"><span class="num">10</span>Close to ONE specific next step</div>
+        <div class="say"><em>Say</em>"The natural first step is a short readiness audit. Want me to send a one-page proposal today so you can see the scope and price?"</div>
+      </div></div>
+
+    </div>
+  </div>
+
+  <!-- QUESTIONS -->
+  <div class="block">
+    <h3 class="sec">Discovery questions to keep handy <span class="rule"></span></h3>
+    <p class="lead">Ask, then wait. Silence gets you the real answer.</p>
+    <div class="qbank">
+      <ul class="q">
+        <li>What made you reach out <em>now</em>, specifically?</li>
+        <li>What's the one task you wish would just do itself?</li>
+        <li>How are you handling that today?</li>
+        <li>What have you already tried — and what happened?</li>
+        <li>If this were solved tomorrow, what would you do with the time?</li>
+        <li>Who else would be part of a decision like this?</li>
+        <li>What would make this an easy yes for you?</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- QUALIFY -->
+  <div class="block">
+    <h3 class="sec">Does this lead qualify for a grant? <span class="rule"></span></h3>
+    <div class="items">
+      <div class="item" role="checkbox" tabindex="0"><div class="ck"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6"/></svg></div><div><div class="title">Ontario-based and for-profit</div></div></div>
+      <div class="item" role="checkbox" tabindex="0"><div class="ck"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6"/></svg></div><div><div class="title">Under 50 employees</div></div></div>
+      <div class="item" role="checkbox" tabindex="0"><div class="ck"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6"/></svg></div><div><div class="title">Willing to put in their share (grants are matched, not free)</div></div></div>
+      <div class="item" role="checkbox" tabindex="0"><div class="ck"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6"/></svg></div><div><div class="title">Has a real project to fund — adoption or training, not just curiosity</div></div></div>
+    </div>
+  </div>
+
+  <!-- OBJECTIONS -->
+  <div class="block">
+    <h3 class="sec">Handling pushback <span class="rule"></span></h3>
+    <div class="obj">
+      <div class="o"><div class="q2">It's too expensive.</div><div class="a">"Fair — that's exactly why we start small and look at grant funding. The first step is often a few hundred dollars, and it pays for itself in hours saved."</div></div>
+      <div class="o"><div class="q2">Will AI replace my staff?</div><div class="a">"No — it takes the boring, repetitive work off their plate so they can do the skilled work you actually hired them for."</div></div>
+      <div class="o"><div class="q2">I'm not technical at all.</div><div class="a">"You don't need to be. I handle the tech and train your team in plain English. If you can use a smartphone, you're fine."</div></div>
+      <div class="o"><div class="q2">Is the grant thing actually real?</div><div class="a">"Yes — Ontario actively funds this. I <b>can't</b> guarantee approval, but I'll tell you honestly if you qualify and handle the paperwork."</div></div>
+      <div class="o"><div class="q2">I need to think about it.</div><div class="a">"Totally reasonable. Can I send a short one-pager and we pencil a quick follow-up for [day]? No pressure either way."</div></div>
+    </div>
+  </div>
+
+  <!-- AFTER -->
+  <div class="block">
+    <h3 class="sec">After you hang up <span class="rule"></span></h3>
+    <div class="items">
+      <div class="item" role="checkbox" tabindex="0"><div class="ck"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6"/></svg></div><div><div class="title">Send the recap + proposal within 24 hours (sooner is better)</div></div></div>
+      <div class="item" role="checkbox" tabindex="0"><div class="ck"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6"/></svg></div><div><div class="title">Log notes + the agreed next step + date in your tracker</div></div></div>
+      <div class="item" role="checkbox" tabindex="0"><div class="ck"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6"/></svg></div><div><div class="title">If grant-eligible: note the program and start their DMAP</div></div></div>
+      <div class="item" role="checkbox" tabindex="0"><div class="ck"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6"/></svg></div><div><div class="title">Book the follow-up before it goes cold</div></div></div>
+    </div>
+  </div>
+
+  <!-- DO / DONT -->
+  <div class="block">
+    <h3 class="sec">Golden rules <span class="rule"></span></h3>
+    <div class="dd">
+      <div class="col do">
+        <h4>✓ Do</h4>
+        <ul class="clean do">
+          <li>Listen ~70%, talk ~30%</li>
+          <li>Use their exact words back to them</li>
+          <li>Lead with the problem and the grant</li>
+          <li>End on one specific next step</li>
+          <li>Be honest when they won't qualify</li>
+        </ul>
+      </div>
+      <div class="col dont">
+        <h4>✕ Don't</h4>
+        <ul class="clean dont">
+          <li>Pitch a deployment you can't deliver solo yet</li>
+          <li>Guarantee grant approval or a dollar amount</li>
+          <li>Use jargon — say it like you'd say it to a friend</li>
+          <li>Wing the price — anchor to your Product Ladder</li>
+          <li>Leave without a scheduled next action</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <span>Flower City AI · Brampton, ON</span>
+    <span>Discovery Call Checklist · v1</span>
+  </footer>
+</div>
+
+<script>
+(function () {
+  function toggle(el) {
+    var on = el.dataset.done === "1";
+    el.dataset.done = on ? "0" : "1";
+    el.setAttribute("aria-checked", on ? "false" : "true");
+  }
+  document.querySelectorAll(".item").forEach(function (el) {
+    el.setAttribute("aria-checked", "false");
+    el.addEventListener("click", function () { toggle(el); });
+    el.addEventListener("keydown", function (e) {
+      if (e.key === " " || e.key === "Enter") { e.preventDefault(); toggle(el); }
+    });
+  });
+  document.getElementById("resetBtn").addEventListener("click", function () {
+    document.querySelectorAll('.item[data-done="1"]').forEach(function (el) {
+      el.dataset.done = "0"; el.setAttribute("aria-checked", "false");
+    });
+  });
+  document.getElementById("printBtn").addEventListener("click", function () { window.print(); });
+  var TKEY = "fcai_theme", saved = null;
+  try { saved = localStorage.getItem(TKEY); } catch (e) {}
+  if (saved) document.documentElement.setAttribute("data-theme", saved);
+  document.getElementById("themeBtn").addEventListener("click", function () {
+    var cur = document.documentElement.getAttribute("data-theme");
+    if (!cur) cur = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    var next = cur === "dark" ? "light" : "dark";
+    document.documentElement.setAttribute("data-theme", next);
+    try { localStorage.setItem(TKEY, next); } catch (e) {}
+  });
+})();
+</script>

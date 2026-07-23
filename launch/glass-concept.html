@@ -1,0 +1,189 @@
+<meta charset="utf-8">
+<title>Glass Concept — Flower City AI</title>
+<style>
+  /* ── exact tokens lifted from cleanmeter.app ── */
+  :root {
+    --canvas: #0C111D;             /* section dark bg — rgb(12,17,29) */
+    --page: #f5f5f6;               /* light page frame — rgb(245,245,246) */
+    --glass-bg: rgba(255,255,255,0.02);
+    --glass-border: rgba(255,255,255,0.12);
+    --glass-blur: 15px;
+    --glass-radius: 12px;
+    --btn-border: #333741;         /* rgb(51,55,65) */
+    --ink-on-dark: #ffffff;
+    --sub-on-dark: #98A2B3;
+    --faint-on-dark: #667085;
+    --ink-on-light: #0C111D;
+    --pill: 50px;
+    --font: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    /* stage gradient (our vivid moment) */
+    --g1: #ff8a7a; --g2: #ffb199; --g3: #8f7ae8;
+    --blue: #4d9fff;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--page); font-family: var(--font); color: var(--ink-on-dark);
+    line-height: 1.5; -webkit-font-smoothing: antialiased; }
+
+  .note { text-align: center; font-size: 11px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase;
+    color: #667085; padding: 10px; background: var(--page); }
+
+  /* rounded dark canvas, inset like cleanmeter */
+  .canvas { background: var(--canvas); border-radius: 24px; margin: 0 10px 10px; overflow: hidden; position: relative; }
+
+  /* floating glass pill nav */
+  .nav { position: sticky; top: 12px; z-index: 30; display: flex; align-items: center; justify-content: space-between;
+    max-width: 720px; margin: 18px auto 0; padding: 10px 10px 10px 20px;
+    background: rgba(255,255,255,0.04); border: 1px solid var(--glass-border); border-radius: var(--pill);
+    backdrop-filter: blur(var(--glass-blur)); -webkit-backdrop-filter: blur(var(--glass-blur)); }
+  .nav .wm { font-size: 14px; font-weight: 700; letter-spacing: -.01em; }
+  .nav .wm span { color: var(--faint-on-dark); font-weight: 500; font-size: 11.5px; margin-left: 8px; }
+  .nav a { font-size: 13px; font-weight: 600; color: var(--ink-on-light); background: #fff; text-decoration: none;
+    padding: 9px 18px; border-radius: var(--pill); transition: transform .15s; }
+  .nav a:hover { transform: scale(1.04); }
+  @media (max-width: 760px) { .nav { margin-inline: 14px; } .nav .wm span { display: none; } }
+
+  /* hero */
+  .hero { text-align: center; padding: clamp(54px, 10vh, 110px) 22px 26px; }
+  h1 { font-size: clamp(38px, 6.6vw, 72px); font-weight: 700; letter-spacing: -.03em; line-height: 1.04;
+    margin: 0 auto 18px; max-width: 16ch; color: #fff; text-wrap: balance; }
+  .sub { font-size: clamp(16px, 2vw, 20px); color: var(--sub-on-dark); max-width: 44ch; margin: 0 auto 30px; }
+  .cta { display: inline-flex; align-items: center; gap: 12px; background: #fff; color: var(--ink-on-light);
+    font-weight: 700; font-size: 16px; text-decoration: none; padding: 8px 8px 8px 26px; border-radius: var(--pill);
+    box-shadow: 0 0 0 6px rgba(255,255,255,0.08); transition: transform .15s, box-shadow .15s; }
+  .cta:hover { transform: scale(1.03); box-shadow: 0 0 0 9px rgba(255,255,255,0.1); }
+  .cta .ico { width: 40px; height: 40px; border-radius: 50%; background: var(--ink-on-light); color: #fff;
+    display: grid; place-items: center; font-size: 17px; }
+  .cta-sub { display: block; margin-top: 16px; font-size: 12.5px; color: var(--faint-on-dark); }
+
+  /* ── the stage: vivid gradient + floating glass chat ── */
+  .stage { max-width: 900px; margin: 46px auto 0; padding: 0 18px 64px; }
+  .stage-in { position: relative; border-radius: 20px; overflow: hidden; min-height: 480px;
+    background: linear-gradient(135deg, var(--g1) 0%, var(--g2) 45%, var(--g3) 100%); }
+  .stage-in::after { content: ""; position: absolute; inset: 0;
+    background: radial-gradient(120% 90% at 80% 10%, rgba(255,255,255,.25), transparent 55%); pointer-events: none; }
+  .hud { position: absolute; display: flex; align-items: center; gap: 10px;
+    background: rgba(12,17,29,0.55); border: 1px solid var(--glass-border); border-radius: var(--pill);
+    backdrop-filter: blur(var(--glass-blur)); -webkit-backdrop-filter: blur(var(--glass-blur));
+    padding: 10px 18px; font-size: 13px; font-weight: 600; color: #fff; z-index: 3;
+    opacity: 0; transform: translateY(12px); animation: rise .5s ease forwards; }
+  .hud b { font-variant-numeric: tabular-nums; font-weight: 700; }
+  .hud .k { color: rgba(255,255,255,.55); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; }
+  .hud.tl { top: 22px; left: 22px; animation-delay: .3s; }
+  .hud.tr { top: 22px; right: 22px; animation-delay: .55s; }
+  .hud.br { bottom: 22px; right: 22px; animation-delay: 4.4s; }
+  @keyframes rise { to { opacity: 1; transform: none; } }
+
+  .chatcol { position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%);
+    width: min(430px, calc(100% - 40px)); display: flex; flex-direction: column; gap: 10px; z-index: 2; }
+  .gb { max-width: 88%; padding: 12px 16px; font-size: 14.5px; line-height: 1.4; letter-spacing: -.01em;
+    border-radius: 16px; backdrop-filter: blur(var(--glass-blur)); -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border); opacity: 0; transform: translateY(14px) scale(.97);
+    animation: rise .45s cubic-bezier(.2,1.1,.4,1) forwards; }
+  .gb.cust { align-self: flex-start; background: rgba(255,255,255,0.16); color: #fff; border-bottom-left-radius: 6px; }
+  .gb.ai { align-self: flex-end; background: rgba(12,17,29,0.6); color: #fff; border-bottom-right-radius: 6px; }
+  .gb .who { display: block; font-size: 10px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
+    color: rgba(255,255,255,.5); margin-bottom: 4px; }
+  .gb.t1 { animation-delay: .9s; } .gb.t2 { animation-delay: 2.0s; } .gb.t3 { animation-delay: 3.1s; } .gb.t4 { animation-delay: 4.1s; }
+  .stage .cap { text-align: center; color: var(--faint-on-dark); font-size: 13px; margin-top: 16px; }
+
+  /* glass cards row */
+  .cards { max-width: 900px; margin: 0 auto; padding: 8px 18px 62px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  @media (max-width: 760px) { .cards { grid-template-columns: 1fr; } }
+  .card { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: var(--glass-radius);
+    backdrop-filter: blur(var(--glass-blur)); -webkit-backdrop-filter: blur(var(--glass-blur));
+    padding: 22px; transition: background .2s, transform .2s; }
+  .card:hover { background: rgba(255,255,255,0.05); transform: translateY(-3px); }
+  .card .step { font-size: 10.5px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--faint-on-dark); }
+  .card h3 { margin: 10px 0 6px; font-size: 17px; font-weight: 700; letter-spacing: -.015em; color: #fff; }
+  .card p { margin: 0 0 14px; font-size: 13.5px; color: var(--sub-on-dark); }
+  .card .price { font-size: 12.5px; font-weight: 700; color: #fff; background: rgba(255,255,255,.08);
+    border: 1px solid var(--glass-border); border-radius: var(--pill); padding: 5px 12px; display: inline-block; }
+
+  /* funding band */
+  .fund { text-align: center; padding: 30px 22px 78px; }
+  .fund h2, .end h2 { font-size: clamp(26px, 4.4vw, 42px); font-weight: 700; letter-spacing: -.025em; margin: 0; color: #fff; }
+  .fund .big { font-size: clamp(64px, 12vw, 120px); font-weight: 700; letter-spacing: -.045em; line-height: 1.05; margin: 10px 0 4px;
+    background: linear-gradient(90deg, var(--g1), var(--g2) 50%, var(--g3));
+    -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+  .fund p { color: var(--sub-on-dark); font-size: 15.5px; max-width: 46ch; margin: 8px auto 0; }
+  .fund p b { color: #fff; font-weight: 600; }
+  .fund .fine { font-size: 12px; color: var(--faint-on-dark); margin-top: 12px; }
+
+  /* end */
+  .end { text-align: center; border-top: 1px solid rgba(255,255,255,.08); padding: 66px 22px 82px; }
+  .end p { color: var(--sub-on-dark); font-size: 15.5px; margin: 10px 0 28px; }
+  footer { text-align: center; color: var(--faint-on-dark); font-size: 12px; padding: 0 0 34px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .gb, .hud { animation: none !important; opacity: 1 !important; transform: none !important; }
+    .chatcol { transform: translate(-50%,-50%) !important; }
+  }
+</style>
+
+<div class="note">Concept taste-test · “Glass” · exact cleanmeter tokens</div>
+
+<div class="canvas">
+
+  <div class="nav">
+    <div class="wm">Flower City AI<span>GTA-born · Canada-wide</span></div>
+    <a href="#">Book a free call</a>
+  </div>
+
+  <section class="hero">
+    <h1>Your business, answering at midnight.</h1>
+    <p class="sub">AI that replies, books, and invoices while you sleep — set up for you, part-funded by government grants.</p>
+    <a class="cta" href="#">Book a free 30-min call <span class="ico">→</span></a>
+    <span class="cta-sub">No jargon · No pressure · Honest fit check</span>
+  </section>
+
+  <div class="stage">
+    <div class="stage-in">
+      <div class="hud tl"><span class="k">Reply</span><b>4 sec</b></div>
+      <div class="hud tr"><span class="k">Time</span><b>11:42 PM</b></div>
+      <div class="hud br"><span class="k">Bookings this week</span><b>+11</b></div>
+      <div class="chatcol">
+        <div class="gb cust t1"><span class="who">Customer</span>hey, open tomorrow? need a brake check on my truck</div>
+        <div class="gb ai t2"><span class="who">AI · Village Auto Care</span>We are! 9:30 AM or 2:00 PM free — which suits you?</div>
+        <div class="gb cust t3">9:30 please 🙏</div>
+        <div class="gb ai t4">Booked ✓ 9:30 AM brake check. Confirmation sent — see you then!</div>
+      </div>
+    </div>
+    <p class="cap">This is what we set up — running on your website, WhatsApp, or Instagram.</p>
+  </div>
+
+  <div class="cards">
+    <div class="card">
+      <span class="step">Start · 01</span>
+      <h3>AI training for your team</h3>
+      <p>One hands-on day. Your staff leave using AI for real work.</p>
+      <span class="price">from $500</span>
+    </div>
+    <div class="card">
+      <span class="step">Start · 02</span>
+      <h3>The readiness audit</h3>
+      <p>We find where your hours leak — and hand you a plain plan.</p>
+      <span class="price">from $500</span>
+    </div>
+    <div class="card">
+      <span class="step">Then · 03</span>
+      <h3>Automations, built for you</h3>
+      <p>Replies, bookings, invoicing — live in weeks, after your audit.</p>
+      <span class="price">from $1,000</span>
+    </div>
+  </div>
+
+  <section class="fund">
+    <h2>The government helps pay.</h2>
+    <div class="big">~$115K</div>
+    <p>Ontario businesses under 50 staff can access up to ~$115K toward projects like this. <b>We check your fit honestly and handle the paperwork.</b></p>
+    <p class="fine">Funding is limited and first-come. We never promise money we can't confirm.</p>
+  </section>
+
+  <section class="end">
+    <h2>Thirty minutes. Zero jargon.</h2>
+    <p>Walk away knowing exactly what AI could do for your business.</p>
+    <a class="cta" href="#">Book your free call <span class="ico">→</span></a>
+  </section>
+
+  <footer>Flower City AI · GTA-born, serving all of Canada</footer>
+</div>

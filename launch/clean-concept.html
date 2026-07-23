@@ -1,0 +1,228 @@
+<meta charset="utf-8">
+<title>Clean Concept — Flower City AI</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --bg-soft: #f5f5f7;
+    --ink: #1d1d1f;
+    --muted: #6e6e73;
+    --faint: #a1a1a6;
+    --line: #e8e8ed;
+    --blue: #0a7cff;
+    --green-bubble: #e9e9eb;
+    --accent-1: #ffb340;
+    --accent-2: #30b0c7;
+    --accent-3: #a284e8;
+    --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: var(--font); background: var(--bg); color: var(--ink);
+    line-height: 1.5; -webkit-font-smoothing: antialiased; }
+
+  .note { text-align: center; font-size: 11px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase;
+    color: var(--faint); padding: 12px; border-bottom: 1px solid var(--line); }
+
+  /* nav */
+  nav { display: flex; align-items: center; justify-content: space-between; max-width: 1040px; margin: 0 auto; padding: 18px 22px; }
+  .wm { font-size: 15px; font-weight: 700; letter-spacing: -.01em; }
+  .wm span { color: var(--faint); font-weight: 500; font-size: 12.5px; margin-left: 8px; }
+  .navcta { font-size: 13.5px; font-weight: 600; color: var(--blue); text-decoration: none; }
+
+  /* hero */
+  .hero { max-width: 1040px; margin: 0 auto; padding: clamp(40px, 8vh, 84px) 22px 30px; text-align: center; }
+  h1 { font-size: clamp(36px, 6.8vw, 64px); font-weight: 700; letter-spacing: -.028em; line-height: 1.05;
+    margin: 0 auto 16px; max-width: 17ch; text-wrap: balance; }
+  .sub { font-size: clamp(16px, 2vw, 20px); color: var(--muted); max-width: 42ch; margin: 0 auto 28px; letter-spacing: -.01em; }
+  .cta { display: inline-block; background: var(--blue); color: #fff; font-weight: 600; font-size: 16px;
+    text-decoration: none; padding: 13px 28px; border-radius: 999px; transition: transform .15s ease, box-shadow .15s ease; }
+  .cta:hover { transform: scale(1.03); box-shadow: 0 8px 24px rgba(10,124,255,.3); }
+  .cta-sub { display: block; margin-top: 12px; font-size: 12.5px; color: var(--faint); }
+
+  /* phone */
+  .stagewrap { display: flex; justify-content: center; padding: 44px 22px 70px; }
+  .phone { width: min(330px, 86vw); background: #0c0c0e; border-radius: 48px; padding: 11px;
+    box-shadow: 0 40px 90px -30px rgba(0,0,0,.4), 0 0 0 1.5px #2a2a2e inset; position: relative; }
+  .screen { background: #fff; border-radius: 38px; overflow: hidden; position: relative; }
+  .island { position: absolute; top: 22px; left: 50%; transform: translateX(-50%); width: 96px; height: 26px;
+    background: #0c0c0e; border-radius: 999px; z-index: 5; }
+  .chat-head { padding: 58px 16px 10px; text-align: center; border-bottom: 1px solid var(--line); background: rgba(245,245,247,.92); }
+  .avatar { width: 44px; height: 44px; border-radius: 50%; background: linear-gradient(135deg, #667788, #99a5b3);
+    color: #fff; font-weight: 600; font-size: 17px; display: grid; place-items: center; margin: 0 auto 4px; }
+  .chat-head b { display: block; font-size: 12.5px; font-weight: 600; }
+  .chat-head span { font-size: 10.5px; color: var(--faint); }
+  .thread { padding: 14px 12px 18px; display: flex; flex-direction: column; gap: 7px; min-height: 290px; }
+  .stamp { text-align: center; font-size: 10px; color: var(--faint); font-weight: 600; margin: 2px 0 4px; }
+  .b { max-width: 78%; padding: 8px 12px; border-radius: 18px; font-size: 13.5px; line-height: 1.35; letter-spacing: -.01em;
+    opacity: 0; transform: translateY(10px) scale(.97); animation: pop .38s cubic-bezier(.2,1.1,.4,1) forwards; }
+  .b.in { align-self: flex-start; background: var(--green-bubble); color: var(--ink); border-bottom-left-radius: 5px; }
+  .b.out { align-self: flex-end; background: var(--blue); color: #fff; border-bottom-right-radius: 5px; }
+  @keyframes pop { to { opacity: 1; transform: none; } }
+  .typing-b { align-self: flex-start; background: var(--green-bubble); border-radius: 18px; border-bottom-left-radius: 5px;
+    padding: 11px 14px; display: none; gap: 4px; }
+  .typing-b i { width: 7px; height: 7px; border-radius: 50%; background: #9d9da2; animation: td 1s ease-in-out infinite; }
+  .typing-b i:nth-child(2) { animation-delay: .15s; } .typing-b i:nth-child(3) { animation-delay: .3s; }
+  @keyframes td { 0%,100% { transform: translateY(0); opacity: .5; } 50% { transform: translateY(-4px); opacity: 1; } }
+  .delivered { align-self: flex-end; font-size: 10px; color: var(--faint); font-weight: 600; margin-top: -3px;
+    opacity: 0; animation: pop .3s ease forwards; }
+  .caption { text-align: center; font-size: 13px; color: var(--faint); margin-top: 18px; }
+
+  /* proof strip */
+  .strip { border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); background: var(--bg-soft); }
+  .strip-in { max-width: 1040px; margin: 0 auto; padding: 34px 22px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; text-align: center; }
+  @media (max-width: 640px) { .strip-in { grid-template-columns: 1fr; gap: 26px; } }
+  .stat b { display: block; font-size: 30px; font-weight: 700; letter-spacing: -.03em; font-variant-numeric: tabular-nums; }
+  .stat span { font-size: 13.5px; color: var(--muted); }
+
+  /* services — editorial rows */
+  .rows { max-width: 760px; margin: 0 auto; padding: 74px 22px 30px; }
+  .rows h2, .fund h2 { font-size: clamp(26px, 4.4vw, 40px); font-weight: 700; letter-spacing: -.025em; margin: 0 0 6px; text-align: center; }
+  .rows .lead { text-align: center; color: var(--muted); font-size: 16px; margin: 0 0 38px; }
+  .row { display: grid; grid-template-columns: 5px 1fr auto; gap: 18px; align-items: center;
+    padding: 22px 4px; border-bottom: 1px solid var(--line); transition: background .2s; }
+  .row:first-of-type { border-top: 1px solid var(--line); }
+  .row:hover { background: var(--bg-soft); }
+  .row .bar { width: 5px; height: 44px; border-radius: 99px; background: var(--rc); }
+  .row h3 { margin: 0 0 2px; font-size: 17px; font-weight: 600; letter-spacing: -.015em; }
+  .row p { margin: 0; color: var(--muted); font-size: 14px; }
+  .row .price { font-size: 13.5px; font-weight: 600; color: var(--faint); white-space: nowrap; }
+
+  /* funding */
+  .fund { max-width: 760px; margin: 0 auto; padding: 74px 22px; text-align: center; }
+  .fund .big { font-size: clamp(54px, 10vw, 96px); font-weight: 700; letter-spacing: -.04em; line-height: 1;
+    background: linear-gradient(90deg, #0a7cff, #30b0c7); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; margin: 18px 0 10px; }
+  .fund p { color: var(--muted); font-size: 16px; max-width: 46ch; margin: 0 auto; }
+  .fund p b { color: var(--ink); font-weight: 600; }
+  .fund .fine { font-size: 12px; color: var(--faint); margin-top: 14px; }
+
+  /* end cta */
+  .end { border-top: 1px solid var(--line); text-align: center; padding: 70px 22px 84px; }
+  .end h2 { font-size: clamp(28px, 5vw, 44px); font-weight: 700; letter-spacing: -.025em; margin: 0 0 10px; }
+  .end p { color: var(--muted); font-size: 16px; margin: 0 0 26px; }
+  footer { border-top: 1px solid var(--line); padding: 22px; text-align: center; font-size: 12px; color: var(--faint); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .b, .delivered { animation: none !important; opacity: 1 !important; transform: none !important; }
+    .typing-b { display: none !important; }
+  }
+</style>
+
+<div class="note">Concept taste-test · “Familiar” · not final copy</div>
+
+<nav>
+  <div class="wm">Flower City AI<span>GTA-born · Canada-wide</span></div>
+  <a class="navcta" href="#">Book a free call →</a>
+</nav>
+
+<section class="hero">
+  <h1>Your business, texting back at midnight.</h1>
+  <p class="sub">AI that answers customers, books jobs, and chases invoices — set up for you in plain English. Part-funded by government grants.</p>
+  <a class="cta" href="#">Book a free 30-min call</a>
+  <span class="cta-sub">No jargon. No pressure. Honest fit check.</span>
+</section>
+
+<div class="stagewrap">
+  <div>
+    <div class="phone">
+      <div class="island"></div>
+      <div class="screen">
+        <div class="chat-head">
+          <div class="avatar">VA</div>
+          <b>Village Auto Care</b>
+          <span>usually replies in seconds</span>
+        </div>
+        <div class="thread" id="thread"></div>
+      </div>
+    </div>
+    <p class="caption">This is what we set up. A conversation your customers already know how to have.</p>
+  </div>
+</div>
+
+<div class="strip">
+  <div class="strip-in">
+    <div class="stat"><b>4 sec</b><span>average reply time, day or night</span></div>
+    <div class="stat"><b>15+ hrs</b><span>of busywork handed back weekly</span></div>
+    <div class="stat"><b>~$115K</b><span>in Ontario grants eligible businesses can tap</span></div>
+  </div>
+</div>
+
+<section class="rows">
+  <h2>Three ways to start.</h2>
+  <p class="lead">Small first. Everything begins with a free call.</p>
+  <div class="row" style="--rc: var(--accent-1)">
+    <div class="bar"></div>
+    <div><h3>AI training for your team</h3><p>One hands-on day. Your staff leave using AI for real work.</p></div>
+    <div class="price">from $500</div>
+  </div>
+  <div class="row" style="--rc: var(--accent-2)">
+    <div class="bar"></div>
+    <div><h3>The readiness audit</h3><p>We find where your hours leak, and hand you a plain-English plan.</p></div>
+    <div class="price">from $500</div>
+  </div>
+  <div class="row" style="--rc: var(--accent-3)">
+    <div class="bar"></div>
+    <div><h3>Automations, built for you</h3><p>Replies, bookings, invoicing — live in weeks, after your audit.</p></div>
+    <div class="price">from $1,000</div>
+  </div>
+</section>
+
+<section class="fund">
+  <h2>The government helps pay.</h2>
+  <div class="big">~$115K</div>
+  <p>Canada funds small businesses to adopt this. Ontario businesses under 50 staff can access up to ~$115K — <b>we check your fit honestly and handle the paperwork.</b></p>
+  <p class="fine">Funding is limited and first-come. We never promise money we can't confirm.</p>
+</section>
+
+<section class="end">
+  <h2>Thirty minutes. Zero jargon.</h2>
+  <p>Walk away knowing exactly what AI could do for your business — even if we never work together.</p>
+  <a class="cta" href="#">Book your free call</a>
+</section>
+
+<footer>Flower City AI · GTA-born, serving all of Canada</footer>
+
+<script>
+(function () {
+  var thread = document.getElementById("thread");
+  var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var seq = [
+    { t: "stamp", text: "Today 11:42 PM" },
+    { t: "in",  text: "hey are you open tomorrow? need a brake check on my truck" },
+    { t: "out", text: "We are! Tomorrow we've got 9:30 AM or 2:00 PM free — which suits you?", typed: true },
+    { t: "in",  text: "9:30 please 🙏" },
+    { t: "out", text: "Done — 9:30 AM brake check ✓ Confirmation's on its way. See you then!", typed: true },
+    { t: "delivered", text: "Delivered" }
+  ];
+  var typing = document.createElement("div");
+  typing.className = "typing-b"; typing.innerHTML = "<i></i><i></i><i></i>";
+
+  function render(instant) {
+    thread.innerHTML = "";
+    var i = 0;
+    function add(item) {
+      var d = document.createElement("div");
+      if (item.t === "stamp") { d.className = "stamp"; d.textContent = item.text; }
+      else if (item.t === "delivered") { d.className = "delivered"; d.textContent = item.text; }
+      else { d.className = "b " + item.t; d.textContent = item.text; }
+      if (instant) { d.style.animation = "none"; d.style.opacity = 1; d.style.transform = "none"; }
+      thread.appendChild(d);
+    }
+    if (instant) { seq.forEach(add); return; }
+    function next() {
+      if (i >= seq.length) { setTimeout(function () { render(false); }, 5200); return; }
+      var item = seq[i];
+      var show = function () {
+        if (typing.parentNode) typing.parentNode.removeChild(typing);
+        typing.style.display = "none";
+        add(item); i++;
+        setTimeout(next, item.t === "stamp" ? 500 : 1150);
+      };
+      if (item.typed) {
+        thread.appendChild(typing); typing.style.display = "inline-flex";
+        setTimeout(show, 950);
+      } else show();
+    }
+    next();
+  }
+  render(reduced);
+})();
+</script>

@@ -1,0 +1,339 @@
+<title>Hero Concepts A/B — Flower City AI Redesign</title>
+<style>
+  :root {
+    --paper: #faf8f4;
+    --paper-2: #f3efe8;
+    --ink: #171512;
+    --muted: #6d6558;
+    --faint: #a39a8b;
+    --line: #e7e1d6;
+    --amber: #e8a020;
+    --amber-deep: #c07f08;
+    --navy: #14161d;
+    --navy-2: #1d2029;
+    --good: #2f8f5b;
+    --font: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --paper:#16140f; --paper-2:#1d1a14; --ink:#f2ede4; --muted:#a89f90; --faint:#6e6656;
+      --line:#2b2820; --amber:#f0b03a; --amber-deep:#f7c25e; --navy:#0e1016; --navy-2:#171a22; --good:#4bbf7e; }
+  }
+  :root[data-theme="light"] { --paper:#faf8f4; --paper-2:#f3efe8; --ink:#171512; --muted:#6d6558; --faint:#a39a8b; --line:#e7e1d6; --amber:#e8a020; --amber-deep:#c07f08; --navy:#14161d; --navy-2:#1d2029; --good:#2f8f5b; }
+  :root[data-theme="dark"] { --paper:#16140f; --paper-2:#1d1a14; --ink:#f2ede4; --muted:#a89f90; --faint:#6e6656; --line:#2b2820; --amber:#f0b03a; --amber-deep:#f7c25e; --navy:#0e1016; --navy-2:#171a22; --good:#4bbf7e; }
+
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: var(--font); background: var(--paper); color: var(--ink); line-height: 1.5; -webkit-font-smoothing: antialiased; }
+
+  /* ── Reviewer chrome ── */
+  .chrome { position: sticky; top: 0; z-index: 50; display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    padding: 10px 18px; background: color-mix(in srgb, var(--paper) 88%, transparent); backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--line); }
+  .chrome .lbl { font-size: 11px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+  .chrome nav { display: flex; gap: 8px; }
+  .chrome a, .chrome button { font-family: inherit; font-size: 12px; font-weight: 700; color: var(--ink); text-decoration: none;
+    background: transparent; border: 1px solid var(--line); border-radius: 8px; padding: 6px 12px; cursor: pointer; }
+  .chrome a:hover, .chrome button:hover { border-color: var(--amber); }
+
+  .divider { padding: 46px 20px 14px; max-width: 1060px; margin: 0 auto; }
+  .divider .tag { display: inline-block; font-size: 11px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase;
+    color: var(--amber-deep); border: 1px solid color-mix(in srgb, var(--amber) 45%, transparent); border-radius: 999px; padding: 5px 12px; }
+  .divider h2 { font-size: clamp(20px, 3.4vw, 27px); font-weight: 800; letter-spacing: -.015em; margin: 12px 0 4px; }
+  .divider p { color: var(--muted); font-size: 14.5px; margin: 0; max-width: 62ch; }
+
+  /* ═════════ CONCEPT A — calculator hero ═════════ */
+  .hero { max-width: 1060px; margin: 18px auto 0; padding: 0 20px 70px; }
+  .heroA { display: grid; grid-template-columns: 1.05fr .95fr; gap: clamp(28px, 5vw, 64px); align-items: center; min-height: 78svh; }
+  @media (max-width: 860px) { .heroA { grid-template-columns: 1fr; min-height: auto; padding-top: 10px; } }
+
+  .brand-mini { display: inline-flex; align-items: center; gap: 9px; margin-bottom: 30px; }
+  .brand-mini .m { width: 30px; height: 30px; border-radius: 8px; background: var(--amber); color: #171512; display: grid; place-items: center; font-weight: 800; font-size: 13px; }
+  .brand-mini b { font-size: 13.5px; font-weight: 800; letter-spacing: .04em; }
+  .brand-mini span { color: var(--faint); font-size: 12px; font-weight: 600; }
+
+  .heroA h1 { font-size: clamp(38px, 6.2vw, 66px); line-height: 1.02; letter-spacing: -.03em; font-weight: 800; margin: 0 0 18px; text-wrap: balance; }
+  .heroA h1 .hl { color: var(--amber-deep); }
+  .heroA .sub { color: var(--muted); font-size: clamp(15px, 1.6vw, 17.5px); max-width: 46ch; margin: 0 0 26px; }
+  .heroA .sub b { color: var(--ink); font-weight: 700; }
+  .cta-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+  .cta { display: inline-block; background: var(--ink); color: var(--paper); font-weight: 800; font-size: 15px; text-decoration: none;
+    padding: 14px 26px; border-radius: 12px; transition: transform .15s, box-shadow .15s; }
+  .cta:hover { transform: translateY(-2px); box-shadow: 0 10px 26px rgba(23,21,18,.22); }
+  .cta.ghost { background: transparent; color: var(--ink); border: 1.5px solid var(--line); }
+  .cta.ghost:hover { border-color: var(--amber); box-shadow: none; }
+  .microtrust { margin-top: 20px; color: var(--faint); font-size: 12.5px; }
+
+  /* calculator card */
+  .calc { background: var(--navy); color: #f2efe8; border-radius: 22px; padding: 26px 26px 24px; box-shadow: 0 30px 70px -20px rgba(20,22,29,.45); position: relative; overflow: hidden; }
+  .calc::before { content: ""; position: absolute; top: -70px; right: -70px; width: 220px; height: 220px; border-radius: 50%;
+    background: radial-gradient(circle, color-mix(in srgb, var(--amber) 32%, transparent), transparent 70%); pointer-events: none; }
+  .calc .k { font-size: 10.5px; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; color: var(--amber); margin-bottom: 16px; }
+  .fld { margin-bottom: 16px; }
+  .fld label { display: block; font-size: 12px; font-weight: 700; color: rgba(242,239,232,.55); margin-bottom: 7px; }
+  .fld select { width: 100%; font-family: inherit; font-size: 14.5px; font-weight: 600; color: #f2efe8; background: var(--navy-2);
+    border: 1px solid rgba(242,239,232,.14); border-radius: 10px; padding: 11px 12px; }
+  .fld .rrow { display: flex; align-items: center; gap: 14px; }
+  .fld input[type="range"] { flex: 1; accent-color: var(--amber); }
+  .fld .val { font-weight: 800; font-size: 17px; min-width: 44px; text-align: right; font-variant-numeric: tabular-nums; }
+  .meter { background: var(--navy-2); border: 1px solid rgba(242,239,232,.1); border-radius: 14px; padding: 18px; margin-top: 4px; }
+  .meter .row { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+  .meter .big { font-size: clamp(30px, 4vw, 40px); font-weight: 800; letter-spacing: -.02em; color: var(--amber); font-variant-numeric: tabular-nums; }
+  .meter .cap { font-size: 12px; color: rgba(242,239,232,.5); }
+  .meter .bar { height: 8px; border-radius: 999px; background: rgba(242,239,232,.12); margin: 12px 0 8px; overflow: hidden; }
+  .meter .bar i { display: block; height: 100%; width: 0%; background: linear-gradient(90deg, var(--amber), #f6cf6e); border-radius: 999px; transition: width .6s cubic-bezier(.3,1.2,.4,1); }
+  .meter .foot { font-size: 12px; color: rgba(242,239,232,.55); }
+  .meter .foot b { color: #f2efe8; }
+  .calc .fine { margin-top: 12px; font-size: 11px; color: rgba(242,239,232,.4); }
+
+  /* ═════════ CONCEPT B — live work hero ═════════ */
+  .heroB { text-align: center; padding-top: 26px; min-height: 82svh; display: flex; flex-direction: column; justify-content: center; }
+  @media (max-width: 860px) { .heroB { min-height: auto; } }
+  .heroB h1 { font-size: clamp(40px, 7vw, 76px); line-height: 1; letter-spacing: -.035em; font-weight: 800; margin: 18px auto 16px; max-width: 16ch; text-wrap: balance; }
+  .heroB h1 .swap { color: var(--amber-deep); border-bottom: 3px solid var(--amber); }
+  .heroB .sub { color: var(--muted); font-size: clamp(15px, 1.7vw, 18px); max-width: 52ch; margin: 0 auto 28px; }
+  .pillnote { display: inline-flex; align-items: center; gap: 8px; font-size: 12.5px; font-weight: 700; color: var(--amber-deep);
+    border: 1px solid color-mix(in srgb, var(--amber) 40%, transparent); background: color-mix(in srgb, var(--amber) 9%, transparent);
+    border-radius: 999px; padding: 7px 14px; }
+  .pillnote .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--good); animation: blink 1.6s ease-in-out infinite; }
+  @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: .3; } }
+
+  .stage { max-width: 780px; margin: 36px auto 0; background: var(--navy); border-radius: 20px; padding: 18px;
+    box-shadow: 0 34px 80px -24px rgba(20,22,29,.5); text-align: left; }
+  .stage .bar-top { display: flex; align-items: center; gap: 6px; padding: 0 4px 12px; }
+  .stage .bar-top i { width: 9px; height: 9px; border-radius: 50%; background: rgba(242,239,232,.18); }
+  .stage .bar-top span { margin-left: auto; font-size: 11px; color: rgba(242,239,232,.4); font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+  .chat { background: var(--navy-2); border-radius: 12px; padding: 16px; min-height: 168px; display: flex; flex-direction: column; gap: 10px; }
+  .msg { max-width: 82%; padding: 9px 13px; border-radius: 12px; font-size: 13.5px; line-height: 1.45; opacity: 0; transform: translateY(8px); animation: rise .45s ease forwards; }
+  .msg.cust { align-self: flex-start; background: rgba(242,239,232,.1); color: #f2efe8; border-bottom-left-radius: 4px; }
+  .msg.ai { align-self: flex-end; background: var(--amber); color: #171512; font-weight: 600; border-bottom-right-radius: 4px; }
+  .msg .who { display: block; font-size: 10px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; opacity: .55; margin-bottom: 3px; }
+  @keyframes rise { to { opacity: 1; transform: translateY(0); } }
+  .typing { align-self: flex-end; display: none; gap: 4px; padding: 10px 13px; background: color-mix(in srgb, var(--amber) 22%, var(--navy-2)); border-radius: 12px; border-bottom-right-radius: 4px; }
+  .typing i { width: 6px; height: 6px; border-radius: 50%; background: var(--amber); animation: tdot 1s ease-in-out infinite; }
+  .typing i:nth-child(2) { animation-delay: .15s; } .typing i:nth-child(3) { animation-delay: .3s; }
+  @keyframes tdot { 0%,100% { transform: translateY(0); opacity: .5; } 50% { transform: translateY(-4px); opacity: 1; } }
+  .stage .foot { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 12px 6px 2px; flex-wrap: wrap; }
+  .stage .foot .stat { font-size: 12px; color: rgba(242,239,232,.55); }
+  .stage .foot .stat b { color: var(--amber); font-variant-numeric: tabular-nums; }
+
+  .heroB .cta-row { justify-content: center; margin-top: 32px; }
+
+  /* verdict */
+  .verdict { max-width: 1060px; margin: 0 auto; padding: 10px 20px 80px; }
+  .verdict .card { background: var(--paper-2); border: 1px solid var(--line); border-radius: 16px; padding: 22px 24px; }
+  .verdict h3 { margin: 0 0 10px; font-size: 16px; font-weight: 800; }
+  .verdict ul { margin: 0; padding-left: 18px; color: var(--muted); font-size: 14px; display: flex; flex-direction: column; gap: 7px; }
+  .verdict b { color: var(--ink); }
+
+  @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } .msg { opacity: 1; transform: none; } }
+</style>
+
+<div class="chrome">
+  <span class="lbl">Redesign — hero concepts</span>
+  <nav>
+    <a href="#a">Concept A</a>
+    <a href="#b">Concept B</a>
+    <button id="themeBtn" type="button">◐</button>
+  </nav>
+</div>
+
+<!-- ══════════ CONCEPT A ══════════ -->
+<div class="divider" id="a">
+  <span class="tag">Concept A · “See your funding”</span>
+  <h2>The calculator hero — your differentiator, made instant</h2>
+  <p>Light editorial page, one dark object: the funding card. The visitor plays with it in the first 10 seconds and gets a number that's about <em>them</em>.</p>
+</div>
+
+<section class="hero">
+  <div class="heroA">
+    <div>
+      <div class="brand-mini"><span class="m">AI</span><b>FLOWER CITY AI</b><span>· GTA · Canada-wide</span></div>
+      <h1>Practical AI, <span class="hl">part-funded</span> by government grants.</h1>
+      <p class="sub">We help Canadian small businesses automate the busywork — and we handle the funding paperwork. <b>Based in the GTA, serving all of Canada.</b></p>
+      <div class="cta-row">
+        <a class="cta" href="#">Book a free call</a>
+        <a class="cta ghost" href="#">How funding works</a>
+      </div>
+      <p class="microtrust">✓ Free 30-min consult&nbsp;&nbsp;✓ No jargon&nbsp;&nbsp;✓ Honest fit check</p>
+    </div>
+
+    <div class="calc" aria-label="Funding estimator">
+      <div class="k">Your funding, in 10 seconds</div>
+      <div class="fld">
+        <label for="prov">Where's your business?</label>
+        <select id="prov">
+          <option value="on">Ontario</option>
+          <option value="other">Rest of Canada</option>
+        </select>
+      </div>
+      <div class="fld">
+        <label for="team">Team size — <span id="teamCap">works best under 50</span></label>
+        <div class="rrow">
+          <input id="team" type="range" min="1" max="60" value="8" />
+          <span class="val" id="teamVal">8</span>
+        </div>
+      </div>
+      <div class="meter">
+        <div class="row">
+          <span class="big" id="amt">$0</span>
+          <span class="cap" id="amtCap">potential program funding</span>
+        </div>
+        <div class="bar"><i id="fill"></i></div>
+        <p class="foot" id="foot">Eligible Ontario businesses have accessed up to <b>~$115K</b> through provincial adoption programs.</p>
+      </div>
+      <p class="fine">Estimate only — eligibility &amp; funds vary by program. We confirm your fit honestly on the call.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ CONCEPT B ══════════ -->
+<div class="divider" id="b">
+  <span class="tag">Concept B · “AI at work”</span>
+  <h2>The live-demo hero — show, don't tell</h2>
+  <p>Centered editorial type over a dark “stage” where an AI assistant answers a customer in real time — the product proving itself in the first five seconds.</p>
+</div>
+
+<section class="hero">
+  <div class="heroB">
+    <div><span class="pillnote"><span class="dot"></span> Watching: AI answering a customer at 11:42 PM</span></div>
+    <h1>Your business, <span class="swap" id="swap">answering</span> while you sleep.</h1>
+    <p class="sub">AI that replies to customers, chases invoices, and files the paperwork — set up by a GTA team, part-funded by government grants, serving all of Canada.</p>
+
+    <div class="stage" aria-label="Live AI demo">
+      <div class="bar-top"><i></i><i></i><i></i><span>Live demo · customer chat</span></div>
+      <div class="chat" id="chat"></div>
+      <div class="foot">
+        <span class="stat">Replied in <b>4 seconds</b> · after hours</span>
+        <span class="stat">Bookings this week: <b>+11</b></span>
+      </div>
+    </div>
+
+    <div class="cta-row">
+      <a class="cta" href="#">Book a free call</a>
+      <a class="cta ghost" href="#">See what it costs</a>
+    </div>
+  </div>
+</section>
+
+<!-- verdict -->
+<div class="verdict">
+  <div class="card">
+    <h3>My read — for when we talk</h3>
+    <ul>
+      <li><b>A sells the wedge.</b> No competitor leads with funding; the calculator makes it personal and interactive immediately. Strongest for conversion.</li>
+      <li><b>B sells the feeling.</b> "It's alive and working" is the most on-trend 2026 pattern and demos your actual product. Strongest for wow.</li>
+      <li><b>They can combine:</b> A's calculator as the hero, B's live chat as the first bento tile below the fold — hook first, proof second.</li>
+    </ul>
+  </div>
+</div>
+
+<script>
+(function () {
+  /* theme */
+  var TKEY = "fcai_theme", saved = null;
+  try { saved = localStorage.getItem(TKEY); } catch (e) {}
+  if (saved) document.documentElement.setAttribute("data-theme", saved);
+  document.getElementById("themeBtn").addEventListener("click", function () {
+    var cur = document.documentElement.getAttribute("data-theme");
+    if (!cur) cur = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    var next = cur === "dark" ? "light" : "dark";
+    document.documentElement.setAttribute("data-theme", next);
+    try { localStorage.setItem(TKEY, next); } catch (e) {}
+  });
+
+  /* ── Concept A: calculator ── */
+  var prov = document.getElementById("prov");
+  var team = document.getElementById("team");
+  var teamVal = document.getElementById("teamVal");
+  var amt = document.getElementById("amt");
+  var amtCap = document.getElementById("amtCap");
+  var fill = document.getElementById("fill");
+  var foot = document.getElementById("foot");
+
+  function calc() {
+    var n = +team.value;
+    teamVal.textContent = n;
+    var on = prov.value === "on";
+    var eligible = n <= 50;
+    var target, cap, footHtml, pct;
+    if (on && eligible) {
+      target = 115000; cap = "potential program funding";
+      pct = 100;
+      footHtml = "Eligible Ontario businesses (1–50 staff) have accessed up to <b>~$115K</b> through provincial adoption programs.";
+    } else if (on) {
+      target = 0; cap = "over the 1–50 staff sweet spot"; pct = 12;
+      footHtml = "Main Ontario adoption programs target 1–50 employees — other routes may still apply. <b>Worth a call.</b>";
+    } else {
+      target = 15000; cap = "varies by province"; pct = 40;
+      footHtml = "Provincial programs differ across Canada — several fund digital adoption &amp; training. <b>We'll map yours on the call.</b>";
+    }
+    animate(target);
+    amtCap.textContent = cap;
+    fill.style.width = pct + "%";
+    foot.innerHTML = footHtml;
+  }
+  var cur = 0, raf = null;
+  function animate(to) {
+    if (raf) cancelAnimationFrame(raf);
+    var from = cur, start = null, dur = 550;
+    function step(ts) {
+      if (!start) start = ts;
+      var p = Math.min((ts - start) / dur, 1);
+      var e = 1 - Math.pow(1 - p, 3);
+      cur = Math.round(from + (to - from) * e);
+      amt.textContent = to === 0 && p === 1 ? "Let's talk" : "$" + cur.toLocaleString();
+      if (to === 0) amt.textContent = p === 1 ? "Let's talk" : "$" + cur.toLocaleString();
+      if (p < 1) raf = requestAnimationFrame(step);
+    }
+    raf = requestAnimationFrame(step);
+  }
+  prov.addEventListener("change", calc);
+  team.addEventListener("input", calc);
+  calc();
+
+  /* ── Concept B: chat loop ── */
+  var chat = document.getElementById("chat");
+  var script = [
+    { who: "Customer · 11:42 PM", cls: "cust", text: "Hi — are you open tomorrow? Can I book a brake check for my truck?" },
+    { who: "AI Assistant", cls: "ai", text: "We are! I've got 9:30 AM or 2:00 PM open tomorrow — which works better?" },
+    { who: "Customer", cls: "cust", text: "9:30 works. Thanks!" },
+    { who: "AI Assistant", cls: "ai", text: "Booked ✓ 9:30 AM brake check. Confirmation texted — see you tomorrow!" }
+  ];
+  function playChat() {
+    chat.innerHTML = "";
+    var typing = document.createElement("div");
+    typing.className = "typing"; typing.innerHTML = "<i></i><i></i><i></i>";
+    var i = 0;
+    function next() {
+      if (i >= script.length) { setTimeout(playChat, 3800); return; }
+      var m = script[i];
+      var show = function () {
+        typing.style.display = "none";
+        var d = document.createElement("div");
+        d.className = "msg " + m.cls;
+        d.innerHTML = '<span class="who">' + m.who + "</span>" + m.text;
+        chat.appendChild(d);
+        i++; setTimeout(next, 1050);
+      };
+      if (m.cls === "ai") {
+        chat.appendChild(typing); typing.style.display = "flex";
+        setTimeout(show, 900);
+      } else { show(); }
+    }
+    next();
+  }
+  var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (reduced) {
+    script.forEach(function (m) {
+      var d = document.createElement("div");
+      d.className = "msg " + m.cls;
+      d.innerHTML = '<span class="who">' + m.who + "</span>" + m.text;
+      chat.appendChild(d);
+    });
+  } else { playChat(); }
+
+  /* headline word swap */
+  var words = ["answering", "invoicing", "booking", "following up"];
+  var sw = document.getElementById("swap"), wi = 0;
+  if (!reduced) setInterval(function () { wi = (wi + 1) % words.length; sw.textContent = words[wi]; }, 2600);
+})();
+</script>

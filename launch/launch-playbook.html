@@ -1,0 +1,346 @@
+<title>Flower City AI — Launch Playbook</title>
+<style>
+  :root {
+    --bg: #f6f5f0;
+    --surface: #ffffff;
+    --surface-2: #fbfaf6;
+    --ink: #0f172a;
+    --muted: #5b6474;
+    --faint: #8a91a0;
+    --line: #e6e3da;
+    --line-strong: #d6d2c6;
+    --blue: #1d4ed8;
+    --orange: #d9660f;
+    --green: #157f38;
+    --yellow: #f4c40f;
+    --shadow: 0 1px 2px rgba(15,23,42,.05), 0 8px 24px rgba(15,23,42,.06);
+    --font-body: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0a0f1e;
+      --surface: #121a2e;
+      --surface-2: #0f1728;
+      --ink: #eef1f7;
+      --muted: #9aa4b8;
+      --faint: #6b7488;
+      --line: #232d45;
+      --line-strong: #303c58;
+      --blue: #6f97ff;
+      --orange: #f2963f;
+      --green: #43c56f;
+      --yellow: #f5cd3a;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 30px rgba(0,0,0,.35);
+    }
+  }
+  :root[data-theme="light"] {
+    --bg: #f6f5f0; --surface: #ffffff; --surface-2: #fbfaf6; --ink: #0f172a; --muted: #5b6474;
+    --faint: #8a91a0; --line: #e6e3da; --line-strong: #d6d2c6;
+    --blue: #1d4ed8; --orange: #d9660f; --green: #157f38; --yellow: #f4c40f;
+    --shadow: 0 1px 2px rgba(15,23,42,.05), 0 8px 24px rgba(15,23,42,.06);
+  }
+  :root[data-theme="dark"] {
+    --bg: #0a0f1e; --surface: #121a2e; --surface-2: #0f1728; --ink: #eef1f7; --muted: #9aa4b8;
+    --faint: #6b7488; --line: #232d45; --line-strong: #303c58;
+    --blue: #6f97ff; --orange: #f2963f; --green: #43c56f; --yellow: #f5cd3a;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 30px rgba(0,0,0,.35);
+  }
+
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased; line-height: 1.5; }
+  .wrap { max-width: 940px; margin: 0 auto; padding: 32px 20px 80px; }
+
+  .display { font-weight: 800; letter-spacing: -.01em; text-wrap: balance; }
+  .eyebrow { font-size: 11px; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; }
+
+  /* Header */
+  header { display: flex; flex-wrap: wrap; align-items: center; gap: 16px; justify-content: space-between; margin-bottom: 8px; }
+  .brand { display: flex; align-items: center; gap: 12px; }
+  .mark { width: 42px; height: 42px; border-radius: 11px; background: var(--yellow); color: #0f172a;
+    display: grid; place-items: center; font-weight: 800; font-size: 17px; letter-spacing: .02em; flex: none; }
+  .brand h1 { margin: 0; font-size: 15px; font-weight: 800; letter-spacing: .02em; line-height: 1.1; }
+  .brand span { color: var(--muted); font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
+  .tools { display: flex; gap: 8px; }
+  .btn { font-family: inherit; font-size: 12.5px; font-weight: 700; color: var(--ink); background: var(--surface);
+    border: 1px solid var(--line-strong); border-radius: 9px; padding: 8px 13px; cursor: pointer; transition: border-color .15s, transform .05s; }
+  .btn:hover { border-color: var(--blue); }
+  .btn:active { transform: translateY(1px); }
+  .btn:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+
+  .lede { color: var(--muted); font-size: 15.5px; max-width: 62ch; margin: 22px 0 26px; }
+  .lede b { color: var(--ink); }
+
+  /* Progress */
+  .progress { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 20px 22px;
+    box-shadow: var(--shadow); margin-bottom: 30px; position: sticky; top: 12px; z-index: 5;
+    backdrop-filter: saturate(1.1); }
+  .progress-top { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+  .progress-top .count { font-size: 13px; color: var(--muted); font-weight: 600; }
+  .progress-top .count b { color: var(--ink); font-variant-numeric: tabular-nums; }
+  .pct { font-weight: 800; font-size: 26px; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+  .bar { height: 10px; border-radius: 999px; background: var(--line); overflow: hidden; }
+  .bar > i { display: block; height: 100%; width: 0%;
+    background: linear-gradient(90deg, var(--blue), var(--orange) 55%, var(--green));
+    border-radius: 999px; transition: width .45s cubic-bezier(.4,1.3,.5,1); }
+  .phase-legend { display: flex; flex-wrap: wrap; gap: 14px 20px; margin-top: 14px; }
+  .phase-legend div { display: flex; align-items: center; gap: 7px; font-size: 12px; color: var(--muted); font-weight: 600; }
+  .dot { width: 9px; height: 9px; border-radius: 50%; flex: none; }
+
+  /* Phase */
+  .phase { margin-bottom: 34px; }
+  .phase-head { display: flex; align-items: center; gap: 12px; margin-bottom: 4px; padding-left: 2px; }
+  .phase-tag { font-size: 11px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase;
+    color: #fff; padding: 4px 10px; border-radius: 7px; white-space: nowrap; }
+  .phase h2 { margin: 0; font-size: clamp(22px, 4vw, 30px); }
+  .phase-sub { color: var(--muted); font-size: 14px; margin: 2px 0 16px 2px; }
+  .phase-meter { font-size: 12px; color: var(--faint); font-weight: 700; font-variant-numeric: tabular-nums; margin-left: auto; }
+
+  .tasks { display: flex; flex-direction: column; gap: 10px; }
+  .task { display: grid; grid-template-columns: 26px 1fr; gap: 14px; align-items: start;
+    background: var(--surface); border: 1px solid var(--line); border-left: 3px solid var(--pc, var(--line-strong));
+    border-radius: 12px; padding: 15px 17px; cursor: pointer; transition: border-color .15s, background .15s, transform .05s; }
+  .task:hover { border-color: var(--line-strong); background: var(--surface-2); }
+  .task:hover { border-left-color: var(--pc); }
+  .task:active { transform: translateY(1px); }
+  .check { width: 22px; height: 22px; border-radius: 7px; border: 2px solid var(--line-strong); margin-top: 1px;
+    display: grid; place-items: center; transition: background .15s, border-color .15s; flex: none; }
+  .check svg { width: 13px; height: 13px; opacity: 0; transform: scale(.6); transition: opacity .15s, transform .15s; }
+  .task[data-done="1"] .check { background: var(--pc); border-color: var(--pc); }
+  .task[data-done="1"] .check svg { opacity: 1; transform: scale(1); }
+  .t-title { font-weight: 700; font-size: 15px; letter-spacing: -.005em; }
+  .t-why { color: var(--muted); font-size: 13.5px; margin-top: 3px; }
+  .t-why a { color: var(--blue); text-decoration: none; border-bottom: 1px solid color-mix(in srgb, var(--blue) 35%, transparent); }
+  .t-why a:hover { border-bottom-color: var(--blue); }
+  .task[data-done="1"] .t-title { text-decoration: line-through; text-decoration-color: var(--faint); color: var(--muted); }
+  .task[data-done="1"] .t-why { opacity: .65; }
+  .task:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+
+  .express .phase-tag { background: #0f172a; color: var(--yellow); }
+  :root[data-theme="dark"] .express .phase-tag, .express .phase-tag { }
+
+  footer { margin-top: 46px; padding-top: 20px; border-top: 1px solid var(--line);
+    color: var(--faint); font-size: 12.5px; display: flex; flex-wrap: wrap; gap: 6px 16px; justify-content: space-between; }
+  .disclaimer { color: var(--faint); font-size: 12px; margin-top: 8px; max-width: 68ch; }
+
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+  @media print {
+    .tools, .progress { position: static; }
+    .task { break-inside: avoid; }
+    body { background: #fff; }
+  }
+  @media (max-width: 560px) {
+    .progress { position: static; }
+    .phase-meter { width: 100%; margin: 4px 0 0 0; }
+  }
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <div class="mark">AI</div>
+      <div>
+        <h1>FLOWER CITY AI</h1>
+        <span>Launch Playbook</span>
+      </div>
+    </div>
+    <div class="tools">
+      <button class="btn" id="themeBtn" type="button" aria-label="Toggle theme">◐ Theme</button>
+      <button class="btn" id="printBtn" type="button">Print</button>
+      <button class="btn" id="resetBtn" type="button">Reset</button>
+    </div>
+  </header>
+
+  <p class="lede">Your 90-day path from pre-revenue to your first paying clients — built around the <b>grants-led</b> plan.
+    Work top to bottom. Progress saves automatically in this browser. Start with <b>This Week</b>.</p>
+
+  <div class="progress">
+    <div class="progress-top">
+      <div class="count"><b id="doneN">0</b> of <b id="totalN">0</b> steps complete</div>
+      <div class="pct" id="pct">0%</div>
+    </div>
+    <div class="bar"><i id="fill"></i></div>
+    <div class="phase-legend">
+      <div><span class="dot" style="background:#0f172a"></span> This week</div>
+      <div><span class="dot" style="background:var(--blue)"></span> Days 1–30 · Foundation</div>
+      <div><span class="dot" style="background:var(--orange)"></span> Days 31–60 · First clients</div>
+      <div><span class="dot" style="background:var(--green)"></span> Days 61–90 · Traction</div>
+    </div>
+  </div>
+
+  <div id="board"></div>
+
+  <p class="disclaimer">Grant programs (OCI DCC/DMAP/TDP, COJG) have limited funds, changing intake windows, and eligibility rules —
+    confirm current status directly with the program before promising anything to a client. This playbook is a working checklist, not legal or funding advice.</p>
+
+  <footer>
+    <span>Flower City AI · Brampton, ON</span>
+    <span>Grants-led launch · v1</span>
+  </footer>
+</div>
+
+<script>
+(function () {
+  var PHASES = [
+    { id: "wk", tag: "This Week", cls: "express", color: "#0f172a",
+      title: "Stand It Up", sub: "The bare minimum to be a real, contactable business. Knock these out in days, not weeks.",
+      tasks: [
+        ["Register the business in Ontario", "Sole proprietorship via ontario.ca — about $60. You need this before invoicing or insuring. <a href='https://www.ontario.ca/page/registering-your-business-name' target='_blank' rel='noopener'>ontario.ca</a>"],
+        ["Lock a domain + business email", "e.g. hello@flowercityai.ca. A gmail address undercuts the ~$115K-grant pitch."],
+        ["Get a business phone line", "Google Voice or a cheap VoIP number. Keep it off your personal cell."],
+        ["Add a booking link + wire it to the CTAs", "Free Cal.com/Calendly. Point the site's ‘Book Free Call’ buttons at it so leads self-schedule."],
+        ["Fill in the [Your Name] founder block", "The site has a placeholder in the ‘Why Flower City AI’ section. Add your name + a real photo — people buy from a person."],
+        ["Deploy the updated site", "Push to Netlify / Vercel / Cloudflare Pages (all free) on your domain. The Google Form already captures leads."],
+        ["Create LinkedIn + Google Business Profile", "Personal LinkedIn, a company page, and a ‘Flower City AI, Brampton’ Google Business Profile for local search."],
+        ["Set up a simple lead tracker", "HubSpot Free or a Notion board. Every Google Form submission becomes a row you follow up within 24h."]
+      ]
+    },
+    { id: "p1", tag: "Days 1–30", color: "var(--blue)",
+      title: "Foundation & Grant-Ready", sub: "Become the person who can walk a Brampton owner through government-funded AI — and get your paperwork straight.",
+      tasks: [
+        ["Learn the OCI grant programs cold", "DCC, DMAP, and the Technology Demonstration Program — eligibility (Ontario for-profit, 1–50 staff), amounts, and the DMAP→TDP flow. <a href='https://www.oc-innovation.ca' target='_blank' rel='noopener'>oc-innovation.ca</a>"],
+        ["Confirm current intake + funding status", "Programs are first-come, first-served while funds last. Verify what's open now before you market it. Note: CDAP is closed; COJG is paused as of 2026."],
+        ["Finalize your one-page grant offer", "Adapt the Grant Go-To-Market Kit into a PDF you can send a prospect after a call."],
+        ["Get an E&O insurance quote", "Professional liability before your first client — your own business plan flags this (§12)."],
+        ["Build your SOW + contract template", "Scope, deliverables, timeline, payment terms, and a change-order clause to stop scope creep."],
+        ["Open your starter tool accounts", "ChatGPT/Gemini, Zapier or Make, and a chatbot builder (Voiceflow/Botpress). Keep total under ~$150/mo."],
+        ["Join the local rooms", "Brampton Board of Trade + 2–3 local business Facebook groups + one trucking/retail association."],
+        ["Publish 3 LinkedIn posts on grant-funded AI", "‘How Brampton businesses can get government money for AI’ beats generic ‘save time’ content."]
+      ]
+    },
+    { id: "p2", tag: "Days 31–60", color: "var(--orange)",
+      title: "First 3 Clients & Real Proof", sub: "Turn the ‘Be One of Our First 3’ offer into signed founding clients and real, quotable results.",
+      tasks: [
+        ["Book 8+ discovery calls", "Warm network first, then the groups and associations you joined. The free 30-min call is your top of funnel."],
+        ["Sign 3 founding clients", "At founder pricing, in exchange for honest feedback and a case study — exactly what the site now promises."],
+        ["Deliver 3 AI Readiness Audits", "Each ends in a plain-English roadmap. This is your paid (or discounted) entry product."],
+        ["Prep a DMAP for any grant-eligible client", "Where a client qualifies, start their Digital Modernization & Adoption Plan and the grant application."],
+        ["Ship one quick win per client", "A live chatbot or a working automation inside 2–4 weeks, so results are real, not promised."],
+        ["Capture real results + testimonials", "Before/after numbers (hours saved, leads captured) and a signed quote you're allowed to publish."],
+        ["Replace the founding-client copy with a real case study", "Swap the placeholder ‘First 3’ cards for your first genuine result the moment you have one."]
+      ]
+    },
+    { id: "p3", tag: "Days 61–90", color: "var(--green)",
+      title: "Traction & Repeatable Pipeline", sub: "Convert proof into recurring revenue and a marketing engine that runs every week.",
+      tasks: [
+        ["Publish 2 case studies", "On the site and LinkedIn. Real names + numbers now do the selling the fake testimonials used to fake."],
+        ["Convert 2 clients to retainers", "$300–$800/mo for maintenance, updates, and priority support — this is your recurring base."],
+        ["Host one free workshop", "‘Get Government-Funded AI for Your Brampton Business.’ Aim for 10+ attendees, harvest warm leads."],
+        ["Launch a referral program", "10% off next invoice for a successful referral — cheapest pipeline you'll ever build."],
+        ["Set a weekly operating rhythm", "Each week: publish content, make 5 outreach touches, review pipeline, follow up every open lead."],
+        ["Track KPIs against the plan", "Calls booked, active clients, and monthly recurring revenue vs. your business-plan targets."]
+      ]
+    }
+  ];
+
+  var KEY = "fcai_launch_v1";
+  var state = {};
+  try { state = JSON.parse(localStorage.getItem(KEY) || "{}"); } catch (e) { state = {}; }
+
+  var board = document.getElementById("board");
+  var total = 0;
+
+  PHASES.forEach(function (ph) {
+    var sec = document.createElement("section");
+    sec.className = "phase " + (ph.cls || "");
+    sec.style.setProperty("--pc", ph.color);
+
+    var head = document.createElement("div");
+    head.className = "phase-head";
+    head.innerHTML = '<span class="phase-tag" style="background:' + ph.color + '">' + ph.tag + '</span>' +
+      '<h2 class="display">' + ph.title + '</h2>' +
+      '<span class="phase-meter" data-meter="' + ph.id + '"></span>';
+    sec.appendChild(head);
+
+    var sub = document.createElement("p");
+    sub.className = "phase-sub";
+    sub.textContent = ph.sub;
+    sec.appendChild(sub);
+
+    var list = document.createElement("div");
+    list.className = "tasks";
+
+    ph.tasks.forEach(function (t, i) {
+      total++;
+      var id = ph.id + "_" + i;
+      var done = state[id] ? "1" : "0";
+      var el = document.createElement("div");
+      el.className = "task";
+      el.setAttribute("role", "checkbox");
+      el.setAttribute("tabindex", "0");
+      el.setAttribute("aria-checked", done === "1" ? "true" : "false");
+      el.dataset.done = done;
+      el.dataset.id = id;
+      el.dataset.phase = ph.id;
+      el.style.setProperty("--pc", ph.color);
+      el.innerHTML =
+        '<div class="check"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6"/></svg></div>' +
+        '<div><div class="t-title">' + t[0] + '</div><div class="t-why">' + t[1] + '</div></div>';
+      el.addEventListener("click", function () { toggle(el); });
+      el.addEventListener("keydown", function (e) {
+        if (e.key === " " || e.key === "Enter") { e.preventDefault(); toggle(el); }
+      });
+      list.appendChild(el);
+    });
+
+    sec.appendChild(list);
+    board.appendChild(sec);
+  });
+
+  document.getElementById("totalN").textContent = total;
+
+  function toggle(el) {
+    var on = el.dataset.done === "1";
+    el.dataset.done = on ? "0" : "1";
+    el.setAttribute("aria-checked", on ? "false" : "true");
+    if (on) { delete state[el.dataset.id]; } else { state[el.dataset.id] = 1; }
+    try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
+    render();
+  }
+
+  function render() {
+    var done = 0;
+    var perPhase = {};
+    document.querySelectorAll(".task").forEach(function (el) {
+      var ph = el.dataset.phase;
+      perPhase[ph] = perPhase[ph] || { d: 0, t: 0 };
+      perPhase[ph].t++;
+      if (el.dataset.done === "1") { done++; perPhase[ph].d++; }
+    });
+    var pct = total ? Math.round(done / total * 100) : 0;
+    document.getElementById("doneN").textContent = done;
+    document.getElementById("pct").textContent = pct + "%";
+    document.getElementById("fill").style.width = pct + "%";
+    Object.keys(perPhase).forEach(function (id) {
+      var m = document.querySelector('[data-meter="' + id + '"]');
+      if (m) m.textContent = perPhase[id].d + "/" + perPhase[id].t;
+    });
+  }
+  render();
+
+  // Tools
+  document.getElementById("resetBtn").addEventListener("click", function () {
+    if (!confirm("Clear all progress on this playbook?")) return;
+    state = {};
+    try { localStorage.removeItem(KEY); } catch (e) {}
+    document.querySelectorAll(".task").forEach(function (el) {
+      el.dataset.done = "0"; el.setAttribute("aria-checked", "false");
+    });
+    render();
+  });
+  document.getElementById("printBtn").addEventListener("click", function () { window.print(); });
+
+  var themeBtn = document.getElementById("themeBtn");
+  var TKEY = "fcai_theme";
+  var saved = null;
+  try { saved = localStorage.getItem(TKEY); } catch (e) {}
+  if (saved) document.documentElement.setAttribute("data-theme", saved);
+  themeBtn.addEventListener("click", function () {
+    var cur = document.documentElement.getAttribute("data-theme");
+    if (!cur) cur = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    var next = cur === "dark" ? "light" : "dark";
+    document.documentElement.setAttribute("data-theme", next);
+    try { localStorage.setItem(TKEY, next); } catch (e) {}
+  });
+})();
+</script>

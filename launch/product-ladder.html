@@ -1,0 +1,292 @@
+<title>Flower City AI — Product Ladder</title>
+<style>
+  :root {
+    --bg: #f5f6f9;
+    --surface: #ffffff;
+    --surface-2: #f8f9fc;
+    --ink: #101828;
+    --muted: #5a6478;
+    --faint: #8b93a5;
+    --line: #e6e8ef;
+    --line-strong: #d3d7e2;
+    --accent: #1d4ed8;
+    --now: #12894a;
+    --now-bg: #e6f4ec;
+    --next: #c47510;
+    --next-bg: #fbf1df;
+    --hi: #b4462a;
+    --shadow: 0 1px 2px rgba(16,24,40,.05), 0 10px 28px rgba(16,24,40,.07);
+    --font-body: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0a0e18; --surface: #131826; --surface-2: #0f1420; --ink: #eef1f7; --muted: #9aa3b6; --faint: #646d80;
+      --line: #222838; --line-strong: #303748; --accent: #7b9cff; --now: #3ec574; --now-bg: #10241a;
+      --next: #eaa54a; --next-bg: #241c10; --hi: #e07a5f;
+      --shadow: 0 1px 2px rgba(0,0,0,.35), 0 12px 32px rgba(0,0,0,.45);
+    }
+  }
+  :root[data-theme="light"] { --bg:#f5f6f9; --surface:#fff; --surface-2:#f8f9fc; --ink:#101828; --muted:#5a6478; --faint:#8b93a5; --line:#e6e8ef; --line-strong:#d3d7e2; --accent:#1d4ed8; --now:#12894a; --now-bg:#e6f4ec; --next:#c47510; --next-bg:#fbf1df; --hi:#b4462a; --shadow:0 1px 2px rgba(16,24,40,.05), 0 10px 28px rgba(16,24,40,.07); }
+  :root[data-theme="dark"] { --bg:#0a0e18; --surface:#131826; --surface-2:#0f1420; --ink:#eef1f7; --muted:#9aa3b6; --faint:#646d80; --line:#222838; --line-strong:#303748; --accent:#7b9cff; --now:#3ec574; --now-bg:#10241a; --next:#eaa54a; --next-bg:#241c10; --hi:#e07a5f; --shadow:0 1px 2px rgba(0,0,0,.35), 0 12px 32px rgba(0,0,0,.45); }
+
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font-body); line-height: 1.55; -webkit-font-smoothing: antialiased; }
+  .wrap { max-width: 960px; margin: 0 auto; padding: 30px 20px 80px; }
+  .display { font-weight: 800; letter-spacing: -.015em; text-wrap: balance; }
+  a { color: var(--accent); }
+
+  header { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; justify-content: space-between; }
+  .brand { display: flex; align-items: center; gap: 12px; }
+  .mark { width: 42px; height: 42px; border-radius: 11px; background: #f4c40f; color: #23200a; display: grid; place-items: center; font-weight: 800; font-size: 17px; flex: none; }
+  .brand h1 { margin: 0; font-size: 15px; font-weight: 800; letter-spacing: .02em; line-height: 1.1; }
+  .brand span { color: var(--muted); font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
+  .btn { font-family: inherit; font-size: 12.5px; font-weight: 700; color: var(--ink); background: var(--surface); border: 1px solid var(--line-strong); border-radius: 9px; padding: 8px 13px; cursor: pointer; }
+  .btn:hover { border-color: var(--accent); }
+  .btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .hero { margin: 26px 0 30px; }
+  .kicker { color: var(--accent); font-weight: 800; font-size: 12px; letter-spacing: .16em; text-transform: uppercase; }
+  .hero h2 { font-size: clamp(28px, 6vw, 44px); line-height: 1.03; margin: 10px 0 14px; }
+  .hero p { color: var(--muted); font-size: 16px; max-width: 66ch; margin: 0; }
+  .hero .rule { border-left: 3px solid var(--accent); padding: 10px 0 10px 16px; margin-top: 18px; font-weight: 600; font-size: 15px; max-width: 64ch; }
+
+  .phase { margin-bottom: 34px; }
+  .phase-head { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 4px; }
+  .badge { font-size: 11px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: #fff; padding: 5px 11px; border-radius: 7px; }
+  .badge.now { background: var(--now); }
+  .badge.next { background: var(--next); }
+  .phase h3 { margin: 0; font-size: clamp(20px, 4vw, 27px); }
+  .phase-sub { color: var(--muted); font-size: 14.5px; margin: 4px 0 18px; max-width: 68ch; }
+
+  .cards { display: flex; flex-direction: column; gap: 14px; }
+  .card { background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--pc); border-radius: 14px; padding: 20px 22px; box-shadow: var(--shadow); }
+  .card-top { display: flex; align-items: baseline; justify-content: space-between; gap: 14px; flex-wrap: wrap; }
+  .card h4 { margin: 0; font-size: 19px; font-weight: 800; letter-spacing: -.01em; }
+  .price { font-weight: 800; font-size: 15px; color: var(--ink); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .card p.desc { color: var(--muted); font-size: 14px; margin: 8px 0 14px; max-width: 70ch; }
+  .meta { display: flex; flex-wrap: wrap; gap: 10px 22px; align-items: center; }
+  .meta .lbl { font-size: 10.5px; font-weight: 800; letter-spacing: .09em; text-transform: uppercase; color: var(--faint); margin-right: 6px; }
+  .effort { display: inline-flex; align-items: center; gap: 6px; }
+  .dots { display: inline-flex; gap: 4px; }
+  .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--line-strong); }
+  .dot.on-lo { background: var(--now); }
+  .dot.on-md { background: var(--next); }
+  .dot.on-hi { background: var(--hi); }
+  .effort b { font-size: 12.5px; font-weight: 700; }
+  .chip { font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 999px; border: 1px solid var(--line-strong); background: var(--surface-2); color: var(--ink); }
+  .chip.grant { border-color: color-mix(in srgb, var(--accent) 40%, transparent); color: var(--accent); background: color-mix(in srgb, var(--accent) 8%, transparent); }
+  .chip.none { color: var(--faint); }
+  .note { margin-top: 12px; font-size: 13px; color: var(--muted); background: var(--surface-2); border-radius: 9px; padding: 9px 13px; }
+  .note b { color: var(--ink); }
+
+  section.block { margin-bottom: 40px; }
+  section.block > h3 { font-size: clamp(19px, 3.5vw, 24px); margin: 0 0 6px; }
+  section.block > .sub { color: var(--muted); font-size: 14.5px; margin: 0 0 18px; max-width: 66ch; }
+
+  .twrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow); }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; min-width: 620px; }
+  th, td { text-align: left; padding: 12px 14px; border-bottom: 1px solid var(--line); }
+  thead th { background: var(--surface-2); font-size: 10.5px; letter-spacing: .07em; text-transform: uppercase; color: var(--muted); position: sticky; top: 0; }
+  tbody tr:last-child td { border-bottom: none; }
+  td.p { font-weight: 700; }
+  .pill { font-size: 11px; font-weight: 800; padding: 3px 8px; border-radius: 6px; text-transform: uppercase; letter-spacing: .04em; }
+  .pill.now { background: var(--now-bg); color: var(--now); }
+  .pill.next { background: var(--next-bg); color: var(--next); }
+  .e-lo { color: var(--now); font-weight: 700; }
+  .e-md { color: var(--next); font-weight: 700; }
+  .e-hi { color: var(--hi); font-weight: 700; }
+
+  .map { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  @media (max-width: 640px) { .map { grid-template-columns: 1fr; } }
+  .map .row { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; box-shadow: var(--shadow); }
+  .map .g { font-weight: 800; font-size: 14px; }
+  .map .arrow { color: var(--faint); margin: 0 6px; }
+  .map .p2 { color: var(--muted); font-size: 13.5px; margin-top: 3px; }
+
+  .climb { background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 12%, var(--surface)), var(--surface)); border: 1px solid color-mix(in srgb, var(--accent) 30%, var(--line)); border-radius: 14px; padding: 22px 24px; box-shadow: var(--shadow); }
+  .climb h3 { margin: 0 0 10px; font-size: 20px; font-weight: 800; }
+  ul.clean { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 9px; }
+  ul.clean li { padding-left: 24px; position: relative; font-size: 14.5px; }
+  ul.clean li::before { content: ""; position: absolute; left: 3px; top: 8px; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
+
+  .disclaimer { color: var(--faint); font-size: 12px; margin-top: 12px; max-width: 74ch; }
+  footer { margin-top: 40px; padding-top: 18px; border-top: 1px solid var(--line); color: var(--faint); font-size: 12.5px; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+  @media print { nav, .btn { display: none; } .card, .climb { break-inside: avoid; } body { background: #fff; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <div class="mark">AI</div>
+      <div>
+        <h1>FLOWER CITY AI</h1>
+        <span>Product Ladder</span>
+      </div>
+    </div>
+    <div style="display:flex; gap:8px;">
+      <button class="btn" id="themeBtn" type="button">◐ Theme</button>
+      <button class="btn" id="printBtn" type="button">Print</button>
+    </div>
+  </header>
+
+  <div class="hero">
+    <span class="kicker">What to sell first</span>
+    <h2 class="display">Sell what's easy to deliver and easy to fund — then climb.</h2>
+    <p>You don't have to offer everything on day one. Lead with the products that carry <b>low delivery risk</b> and the <b>clearest grant path</b>, bank the proof and the cash, then move up to the higher-value implementation work.</p>
+    <p class="rule">Rule of thumb: consultation first, training next, deployment later. You can't do direct deployments solo yet — so those are Phase 2, not your opening offer.</p>
+  </div>
+
+  <!-- PHASE 1 -->
+  <div class="phase">
+    <div class="phase-head">
+      <span class="badge now">Phase 1 · Offer now</span>
+      <h3 class="display">Advisory &amp; Teaching</h3>
+    </div>
+    <p class="phase-sub">Nothing to deploy or maintain. You advise and you teach — near-zero technical risk, fast value, and the natural on-ramp to grant funding.</p>
+    <div class="cards">
+
+      <div class="card" style="--pc:var(--now)">
+        <div class="card-top">
+          <h4>Consultation — AI Readiness Audit + Roadmap</h4>
+          <span class="price">$500–$1,500</span>
+        </div>
+        <p class="desc">Review a client's workflows, tools and pain points, then hand them a plain-English roadmap of what to automate and what it's worth. This <em>is</em> the Digital Modernization &amp; Adoption Plan (DMAP).</p>
+        <div class="meta">
+          <span class="effort"><span class="lbl">Effort</span><span class="dots"><i class="dot on-lo"></i><i class="dot on-lo"></i><i class="dot"></i></span><b class="e-lo">Low–Med</b></span>
+          <span><span class="lbl">Grant</span><span class="chip grant">DMAP (planning)</span></span>
+        </div>
+        <div class="note"><b>Why it's first:</b> every client relationship starts here — it's advisory work you write, not deploy, and it's the exact document grants are awarded against, so it <b>unlocks funding for everything after it</b> (including the training).</div>
+      </div>
+
+      <div class="card" style="--pc:var(--now)">
+        <div class="card-top">
+          <h4>AI Team Training</h4>
+          <span class="price">$500–$2,000</span>
+        </div>
+        <p class="desc">Teach a team to actually use ChatGPT / Gemini / Copilot for their daily work — writing, email, research, summarizing. On-site or virtual workshops plus a simple resource guide.</p>
+        <div class="meta">
+          <span class="effort"><span class="lbl">Effort</span><span class="dots"><i class="dot on-lo"></i><i class="dot"></i><i class="dot"></i></span><b class="e-lo">Low</b></span>
+          <span><span class="lbl">Grant</span><span class="chip grant">COJG · up to ~$15K/employee*</span></span>
+        </div>
+        <div class="note"><b>Why it's second:</b> the consultation tells you exactly what to train on — and it's teaching, not building: nothing breaks, nothing to host. *COJG has covered $10K–$15K per employee (50%–83%) when intakes are open — <b>paused in 2026, verify before pitching</b>; training can also sit inside a DMAP.</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- PHASE 2 -->
+  <div class="phase">
+    <div class="phase-head">
+      <span class="badge next">Phase 2 · Add as you grow</span>
+      <h3 class="display">Implementation &amp; Recurring</h3>
+    </div>
+    <p class="phase-sub">Higher effort and skill. Grow into these — or bring in a contractor — once Phase 1 has given you proof, cash, and a written DMAP to fund the build.</p>
+    <div class="cards">
+
+      <div class="card" style="--pc:var(--next)">
+        <div class="card-top">
+          <h4>Workflow Automation</h4>
+          <span class="price">$1,000–$5,000</span>
+        </div>
+        <p class="desc">Connect a client's apps (invoicing, dispatch, CRM) with Zapier or Make so data flows automatically. Start with simple, templated automations; partner out the complex builds.</p>
+        <div class="meta">
+          <span class="effort"><span class="lbl">Effort</span><span class="dots"><i class="dot on-md"></i><i class="dot on-md"></i><i class="dot"></i></span><b class="e-md">Medium</b></span>
+          <span><span class="lbl">Grant</span><span class="chip grant">TDP (implementation)</span></span>
+        </div>
+        <div class="note"><b>Bridge product:</b> your first step from advice into building. Low-risk automations are learnable solo; scope tightly.</div>
+      </div>
+
+      <div class="card" style="--pc:var(--next)">
+        <div class="card-top">
+          <h4>Customer-Service AI / Chatbots</h4>
+          <span class="price">$1,500–$5,000</span>
+        </div>
+        <p class="desc">Deploy chatbots on a website, WhatsApp, or social to answer FAQs and book appointments 24/7. This is the hands-on <em>deployment</em> work you can't do solo today.</p>
+        <div class="meta">
+          <span class="effort"><span class="lbl">Effort</span><span class="dots"><i class="dot on-hi"></i><i class="dot on-hi"></i><i class="dot on-hi"></i></span><b class="e-hi">High</b></span>
+          <span><span class="lbl">Grant</span><span class="chip grant">TDP (implementation)</span></span>
+        </div>
+        <div class="note"><b>Deliver via a contractor first</b> — or after you've upskilled. Sell it once you can stand behind the deployment; don't lead with it.</div>
+      </div>
+
+      <div class="card" style="--pc:var(--next)">
+        <div class="card-top">
+          <h4>Monthly Retainer</h4>
+          <span class="price">$300–$800/mo</span>
+        </div>
+        <p class="desc">Ongoing maintenance, updates, and priority support for whatever you've built. Your recurring, compounding revenue base.</p>
+        <div class="meta">
+          <span class="effort"><span class="lbl">Effort</span><span class="dots"><i class="dot on-lo"></i><i class="dot on-lo"></i><i class="dot"></i></span><b class="e-lo">Low–Med (ongoing)</b></span>
+          <span><span class="lbl">Grant</span><span class="chip none">Not grant-funded</span></span>
+        </div>
+        <div class="note"><b>Only after a delivery:</b> you need something live to maintain. Offer it at the end of every Phase 2 project.</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- SUMMARY TABLE -->
+  <section class="block">
+    <h3 class="display">The ladder at a glance</h3>
+    <p class="sub">Order of offer, top to bottom. Climb only when the rung below is steady.</p>
+    <div class="twrap">
+      <table>
+        <thead><tr><th>Product</th><th>Phase</th><th>Effort to deliver</th><th>Funded by</th><th>Price</th></tr></thead>
+        <tbody>
+          <tr><td class="p">Consultation — Audit + Roadmap</td><td><span class="pill now">Now · 1st</span></td><td class="e-lo">Low–Med</td><td>DMAP</td><td>$500–$1,500</td></tr>
+          <tr><td class="p">AI Team Training</td><td><span class="pill now">Now · 2nd</span></td><td class="e-lo">Low</td><td>COJG* (~$15K/employee)</td><td>$500–$2,000</td></tr>
+          <tr><td class="p">Workflow Automation</td><td><span class="pill next">Next</span></td><td class="e-md">Medium</td><td>TDP</td><td>$1,000–$5,000</td></tr>
+          <tr><td class="p">Chatbots / Deployment</td><td><span class="pill next">Next</span></td><td class="e-hi">High</td><td>TDP</td><td>$1,500–$5,000</td></tr>
+          <tr><td class="p">Monthly Retainer</td><td><span class="pill next">Next</span></td><td class="e-lo">Low–Med</td><td>—</td><td>$300–$800/mo</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- GRANT MAP -->
+  <section class="block">
+    <h3 class="display">Which grant funds which product</h3>
+    <p class="sub">Match the offer to the funding source — and don't promise a program that's closed or paused (verify intake first).</p>
+    <div class="map">
+      <div class="row"><span class="g">DMAP<span class="arrow">→</span>Audit + Roadmap</span><div class="p2">The planning grant. Your Phase-1 audit is the fundable deliverable — and the on-ramp to TDP.</div></div>
+      <div class="row"><span class="g">COJG<span class="arrow">→</span>Team Training</span><div class="p2">Up to ~$10K–$15K <b>per employee</b> (50%–83% covered) when active. <b>Paused in 2026</b> — check ontario.ca/cojg before you pitch it.</div></div>
+      <div class="row"><span class="g">TDP<span class="arrow">→</span>Automation &amp; Chatbots</span><div class="p2">Implementation funding (up to ~$100K, ~50% match), awarded against a DMAP. This funds Phase 2.</div></div>
+      <div class="row"><span class="g">SR&amp;ED / IRAP<span class="arrow">→</span>your own R&amp;D</span><div class="p2">For building proprietary tech — relevant to Flower City AI's own taxes, <b>not</b> a client product.</div></div>
+    </div>
+  </section>
+
+  <!-- HOW TO CLIMB -->
+  <div class="climb">
+    <h3 class="display">How to climb the ladder</h3>
+    <ul class="clean">
+      <li><b>Phase 1 pays for Phase 2.</b> Training + audit revenue and real case studies give you the cash and credibility to take on bigger builds.</li>
+      <li><b>Every audit is a DMAP.</b> The roadmaps you write in Phase 1 are the documents that unlock TDP implementation funding — so Phase 1 literally seeds Phase 2 deals.</li>
+      <li><b>Hire the deployment, don't fake it.</b> When a client needs a chatbot before you can build it solo, subcontract a specialist (your business plan's first scaling trigger) and keep the client relationship.</li>
+      <li><b>End every project with a retainer.</b> Recurring revenue is what turns one-off projects into a business.</li>
+    </ul>
+  </div>
+
+  <p class="disclaimer">Prices reflect the ranges in your business plan; grant names, amounts, and eligibility change often and are summarized from mid-2026 research — confirm current intake with each program before committing to a client. This is a planning tool, not legal, tax, or funding advice.</p>
+
+  <footer>
+    <span>Flower City AI · Brampton, ON</span>
+    <span>Product Ladder · v1</span>
+  </footer>
+</div>
+
+<script>
+(function () {
+  document.getElementById("printBtn").addEventListener("click", function () { window.print(); });
+  var TKEY = "fcai_theme";
+  var saved = null; try { saved = localStorage.getItem(TKEY); } catch (e) {}
+  if (saved) document.documentElement.setAttribute("data-theme", saved);
+  document.getElementById("themeBtn").addEventListener("click", function () {
+    var cur = document.documentElement.getAttribute("data-theme");
+    if (!cur) cur = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    var next = cur === "dark" ? "light" : "dark";
+    document.documentElement.setAttribute("data-theme", next);
+    try { localStorage.setItem(TKEY, next); } catch (e) {}
+  });
+})();
+</script>

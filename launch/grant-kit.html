@@ -1,0 +1,312 @@
+<title>Flower City AI — Grant Go-To-Market Kit</title>
+<style>
+  :root {
+    --bg: #f3f6f1;
+    --surface: #ffffff;
+    --surface-2: #f7faf5;
+    --ink: #0f1c16;
+    --muted: #55655c;
+    --faint: #869184;
+    --line: #e2e7dd;
+    --line-strong: #cfd6c8;
+    --green: #0f7a3d;
+    --forest: #0a5a2e;
+    --gold: #d9a400;
+    --gold-bg: #fbf3d6;
+    --red: #b4462a;
+    --shadow: 0 1px 2px rgba(15,28,22,.05), 0 10px 28px rgba(15,28,22,.07);
+    --font-body: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #071310; --surface: #0f1f18; --surface-2: #0c1a14; --ink: #eaf2ec; --muted: #9db0a3;
+      --faint: #647065; --line: #1e2f26; --line-strong: #2b3f34; --green: #3ac46f; --forest: #4fd07e;
+      --gold: #f0c33c; --gold-bg: #241f0f; --red: #e07a5f;
+      --shadow: 0 1px 2px rgba(0,0,0,.35), 0 12px 32px rgba(0,0,0,.45);
+    }
+  }
+  :root[data-theme="light"] {
+    --bg:#f3f6f1; --surface:#fff; --surface-2:#f7faf5; --ink:#0f1c16; --muted:#55655c; --faint:#869184;
+    --line:#e2e7dd; --line-strong:#cfd6c8; --green:#0f7a3d; --forest:#0a5a2e; --gold:#d9a400; --gold-bg:#fbf3d6; --red:#b4462a;
+    --shadow:0 1px 2px rgba(15,28,22,.05), 0 10px 28px rgba(15,28,22,.07);
+  }
+  :root[data-theme="dark"] {
+    --bg:#071310; --surface:#0f1f18; --surface-2:#0c1a14; --ink:#eaf2ec; --muted:#9db0a3; --faint:#647065;
+    --line:#1e2f26; --line-strong:#2b3f34; --green:#3ac46f; --forest:#4fd07e; --gold:#f0c33c; --gold-bg:#241f0f; --red:#e07a5f;
+    --shadow:0 1px 2px rgba(0,0,0,.35), 0 12px 32px rgba(0,0,0,.45);
+  }
+
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font-body); line-height: 1.55; -webkit-font-smoothing: antialiased; }
+  .wrap { max-width: 960px; margin: 0 auto; padding: 30px 20px 80px; }
+  .display { font-weight: 800; letter-spacing: -.015em; text-wrap: balance; }
+  h2 { font-weight: 800; letter-spacing: -.01em; }
+  a { color: var(--green); }
+
+  header { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; justify-content: space-between; }
+  .brand { display: flex; align-items: center; gap: 12px; }
+  .mark { width: 42px; height: 42px; border-radius: 11px; background: var(--gold); color: #23200a;
+    display: grid; place-items: center; font-weight: 800; font-size: 17px; flex: none; }
+  .brand h1 { margin: 0; font-size: 15px; font-weight: 800; letter-spacing: .02em; line-height: 1.1; }
+  .brand span { color: var(--muted); font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
+  .btn { font-family: inherit; font-size: 12.5px; font-weight: 700; color: var(--ink); background: var(--surface);
+    border: 1px solid var(--line-strong); border-radius: 9px; padding: 8px 13px; cursor: pointer; }
+  .btn:hover { border-color: var(--green); }
+  .btn:focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
+
+  .hero { margin: 26px 0 8px; }
+  .kicker { color: var(--green); font-weight: 800; font-size: 12px; letter-spacing: .16em; text-transform: uppercase; }
+  .hero h2 { font-size: clamp(28px, 6vw, 46px); line-height: 1.02; margin: 10px 0 14px; }
+  .hero p { color: var(--muted); font-size: 16px; max-width: 64ch; margin: 0; }
+
+  nav.jump { display: flex; gap: 8px; margin: 26px 0 34px; position: sticky; top: 10px; z-index: 5; }
+  nav.jump a { flex: 1; text-align: center; text-decoration: none; color: var(--ink); background: var(--surface);
+    border: 1px solid var(--line); border-radius: 11px; padding: 12px 10px; font-weight: 700; font-size: 13.5px; box-shadow: var(--shadow); }
+  nav.jump a:hover { border-color: var(--green); }
+  nav.jump a b { display: block; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--faint); font-weight: 800; margin-bottom: 2px; }
+
+  section.block { scroll-margin-top: 72px; margin-bottom: 46px; }
+  .sec-label { display: inline-flex; align-items: center; gap: 8px; font-size: 11px; font-weight: 800; letter-spacing: .14em;
+    text-transform: uppercase; color: #fff; background: var(--forest); padding: 5px 11px; border-radius: 7px; }
+  .sec-label.internal { background: #0f1c16; color: var(--gold); }
+  :root[data-theme="dark"] .sec-label.internal { background: #060d0a; }
+  section.block > h2 { font-size: clamp(22px, 4.5vw, 32px); margin: 14px 0 6px; }
+  section.block > .sub { color: var(--muted); font-size: 15px; margin: 0 0 22px; max-width: 66ch; }
+
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 20px 22px; box-shadow: var(--shadow); }
+  .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 680px) { .grid3, .grid2 { grid-template-columns: 1fr; } nav.jump { position: static; } }
+
+  .step .n { font-weight: 800; font-size: 12px; letter-spacing: .1em; color: var(--green); text-transform: uppercase; }
+  .step h3 { margin: 8px 0 6px; font-size: 18px; font-weight: 800; }
+  .step p { margin: 0; color: var(--muted); font-size: 14px; }
+
+  .elig { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 16px; }
+  .elig .pill { display: flex; align-items: baseline; gap: 10px; background: var(--surface); border: 1px solid var(--line);
+    border-radius: 12px; padding: 14px 18px; box-shadow: var(--shadow); flex: 1; min-width: 150px; }
+  .elig .big { font-weight: 800; font-size: 26px; letter-spacing: -.02em; color: var(--green); font-variant-numeric: tabular-nums; }
+  .elig .lbl { color: var(--muted); font-size: 13px; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  .twrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 12px; }
+  th, td { text-align: left; padding: 12px 15px; border-bottom: 1px solid var(--line); }
+  thead th { background: var(--surface-2); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+  tbody tr:last-child td { border-bottom: none; }
+  td.num { font-variant-numeric: tabular-nums; font-weight: 700; }
+  .yes { color: var(--green); font-weight: 700; }
+  .no { color: var(--red); font-weight: 700; }
+
+  ul.clean { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px; }
+  ul.clean li { padding-left: 26px; position: relative; color: var(--ink); font-size: 14.5px; }
+  ul.clean li::before { content: ""; position: absolute; left: 4px; top: 8px; width: 8px; height: 8px; border-radius: 50%; background: var(--green); }
+  ul.clean li b { font-weight: 700; }
+
+  .say { border-left: 3px solid var(--green); background: var(--surface-2); padding: 12px 16px; border-radius: 0 10px 10px 0; margin: 0 0 10px; font-size: 14.5px; }
+  .say em { color: var(--faint); font-style: normal; font-weight: 700; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; display: block; margin-bottom: 4px; }
+
+  .callout { border: 1px solid var(--gold); background: var(--gold-bg); border-radius: 12px; padding: 16px 18px; }
+  .callout h3 { margin: 0 0 8px; font-size: 15px; font-weight: 800; color: var(--ink); }
+  .callout ul.clean li::before { background: var(--gold); }
+
+  .status { display: flex; flex-direction: column; gap: 10px; }
+  .status .row { display: grid; grid-template-columns: 90px 1fr; gap: 14px; align-items: start; padding: 12px 0; border-bottom: 1px solid var(--line); }
+  .status .row:last-child { border-bottom: none; }
+  .tag { font-size: 10.5px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; padding: 4px 8px; border-radius: 6px; text-align: center; height: fit-content; }
+  .tag.live { background: color-mix(in srgb, var(--green) 18%, transparent); color: var(--green); }
+  .tag.dead { background: color-mix(in srgb, var(--red) 16%, transparent); color: var(--red); }
+  .tag.hold { background: color-mix(in srgb, var(--gold) 22%, transparent); color: var(--gold); }
+  .status .row b { font-weight: 700; }
+  .status .row p { margin: 3px 0 0; color: var(--muted); font-size: 13.5px; }
+
+  h4.mini { font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--faint); font-weight: 800; margin: 0 0 12px; }
+
+  .disclaimer { color: var(--faint); font-size: 12px; margin-top: 10px; max-width: 74ch; }
+  footer { margin-top: 40px; padding-top: 18px; border-top: 1px solid var(--line); color: var(--faint); font-size: 12.5px;
+    display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; }
+  .stack { display: flex; flex-direction: column; gap: 14px; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+  @media print { nav.jump { display: none; } .card, .callout { break-inside: avoid; } body { background: #fff; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <div class="mark">AI</div>
+      <div>
+        <h1>FLOWER CITY AI</h1>
+        <span>Grant Go-To-Market Kit</span>
+      </div>
+    </div>
+    <div style="display:flex; gap:8px;">
+      <button class="btn" id="themeBtn" type="button">◐ Theme</button>
+      <button class="btn" id="printBtn" type="button">Print</button>
+    </div>
+  </header>
+
+  <div class="hero">
+    <span class="kicker">Government-Funded AI</span>
+    <h2 class="display">Your strongest hook: the government helps pay for it.</h2>
+    <p>Two parts. <b>The Offer</b> is what you say to a prospect — adapt it into a one-pager or your pitch on the call.
+      <b>The Play</b> is how the funding actually works and how you run it honestly. Keep Part 2 internal.</p>
+  </div>
+
+  <nav class="jump">
+    <a href="#offer"><b>Part 1</b> The Offer · client-facing</a>
+    <a href="#play"><b>Part 2</b> The Play · internal</a>
+  </nav>
+
+  <!-- ============ PART 1 : THE OFFER ============ -->
+  <section class="block" id="offer">
+    <span class="sec-label">Part 1 · The Offer</span>
+    <h2 class="display">AI that pays for itself — and that Ontario helps fund.</h2>
+    <p class="sub">This is the promise. Simple, honest, and built for a Brampton owner who's never heard of a “DMAP.”
+      Lead with the money, back it with plain-English delivery.</p>
+
+    <div class="elig">
+      <div class="pill"><span class="big">~$115K</span><span class="lbl">potential funding toward digital &amp; AI adoption in recent Ontario programs</span></div>
+      <div class="pill"><span class="big">1–50</span><span class="lbl">employees — the eligibility sweet spot for Ontario for-profits</span></div>
+      <div class="pill"><span class="big">$0</span><span class="lbl">to find out if you qualify — the discovery call is free</span></div>
+    </div>
+
+    <h4 class="mini">How it works — three steps</h4>
+    <div class="grid3" style="margin-bottom:22px;">
+      <div class="card step"><span class="n">Step 1</span><h3>See if you qualify</h3><p>On a free 30-minute call we check the basics — Ontario for-profit, 1–50 staff — and find the highest-ROI place AI helps you. Straight answer, no hype.</p></div>
+      <div class="card step"><span class="n">Step 2</span><h3>We build your plan</h3><p>We prepare your Digital Modernization &amp; Adoption Plan — the roadmap grant programs are awarded against — so the funding case is ready to submit.</p></div>
+      <div class="card step"><span class="n">Step 3</span><h3>The grant funds the build</h3><p>Once approved, funding offsets the implementation. We build the chatbot / automation, deploy it, and train your team on it.</p></div>
+    </div>
+
+    <div class="grid2">
+      <div class="card">
+        <h4 class="mini">What the funding can go toward</h4>
+        <ul class="clean">
+          <li>Adopting AI tools &amp; automation software</li>
+          <li>Customer-service chatbots &amp; workflow builds</li>
+          <li>The strategy &amp; roadmap work behind them</li>
+          <li>Training your team to actually use it</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4 class="mini">Why owners choose Flower City AI</h4>
+        <ul class="clean">
+          <li><b>Local &amp; independent</b> — Brampton-based, no call centre</li>
+          <li><b>We do the paperwork</b> — you run your business</li>
+          <li><b>Plain English</b> — no jargon, no lock-in</li>
+          <li><b>Honest</b> — if you won't qualify, we'll tell you</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="callout" style="margin-top:16px;">
+      <h3>The honest fine print (say this out loud)</h3>
+      <p style="margin:0; color:var(--muted); font-size:14px;">Grant funding is limited, first-come-first-served, and has eligibility rules — approval is never guaranteed, and we never promise money we can't confirm. We help you build the strongest case and handle the process; the funder makes the final call.</p>
+    </div>
+  </section>
+
+  <!-- ============ PART 2 : THE PLAY ============ -->
+  <section class="block" id="play">
+    <span class="sec-label internal">Part 2 · The Play — internal</span>
+    <h2 class="display">How the funding actually works — and how to run it clean.</h2>
+    <p class="sub">The mechanics behind the pitch, the current 2026 program landscape, your positioning, and the guardrails that keep you honest and out of trouble.</p>
+
+    <div class="stack">
+      <div class="card">
+        <h4 class="mini">The mechanic: DMAP → Technology Demonstration</h4>
+        <ul class="clean">
+          <li><b>The funder doesn't pay you directly.</b> It funds the <em>business</em>, which then engages vendors (that's you) to do the work.</li>
+          <li><b>DMAP first.</b> The Digital Modernization &amp; Adoption Plan is the entry step — a roadmap of what to adopt and why. You can be the one who prepares it. This is a natural paid entry product (your AI Readiness Audit, repackaged).</li>
+          <li><b>Then the Technology Demonstration.</b> Larger implementation funding (recent programs up to ~$100K, typically around 50% matched) is awarded against that plan. You deliver the funded build.</li>
+          <li><b>Your two revenue moments:</b> (1) the plan/audit, (2) the funded implementation — plus a retainer after.</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h4 class="mini">2026 program landscape — verify before every pitch</h4>
+        <div class="status">
+          <div class="row"><span class="tag live">Use this</span><div><b>Ontario Centre of Innovation — DCC / DMAP / TDP</b><p>Your primary lever. Actively funded and expanded for AI/digital adoption. Ontario for-profit, 1–50 employees, first-come-first-served while funds last. Confirm current intake at oc-innovation.ca.</p></div></div>
+          <div class="row"><span class="tag dead">Gone</span><div><b>CDAP (federal $15K / $100K loan)</b><p>Closed March 2024, no federal replacement as of 2026. Do not reference it or build a pitch on it.</p></div></div>
+          <div class="row"><span class="tag hold">Paused</span><div><b>Canada-Ontario Job Grant (COJG)</b><p>Under ministerial review / paused in 2026. Great for funding AI <em>training</em> when active — but don't promise it until intake reopens. Check ontario.ca/cojg.</p></div></div>
+          <div class="row"><span class="tag hold">Your books</span><div><b>SR&amp;ED + NRC IRAP (federal)</b><p>For R&amp;D and building custom tech — relevant to <em>Flower City AI's own</em> taxes if you build proprietary IP, <b>not</b> for a client buying off-the-shelf tools. Don't offer clients SR&amp;ED for tool adoption.</p></div></div>
+        </div>
+      </div>
+
+      <div class="grid2">
+        <div class="card">
+          <h4 class="mini">Position yourself as the implementation partner</h4>
+          <ul class="clean">
+            <li>You're not a grant-writing shop; you're the <b>AI vendor</b> who also makes the funding easy.</li>
+            <li>Bundle it: <b>audit → DMAP → funded build → retainer.</b> The grant de-risks the biggest cheque.</li>
+            <li>Grant help is your <b>differentiator vs. freelancers</b> — none of them do this.</li>
+            <li>Become known to your local OCI advisor / Brampton Board of Trade as the AI implementer.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h4 class="mini">Pricing that stacks with funding</h4>
+          <div class="twrap">
+            <table>
+              <thead><tr><th>Stage</th><th>Your price</th><th>Grant offsets?</th></tr></thead>
+              <tbody>
+                <tr><td>Audit / DMAP</td><td class="num">$500–$1,500</td><td class="yes">Often</td></tr>
+                <tr><td>Implementation</td><td class="num">$1,000–$5,000</td><td class="yes">~50%*</td></tr>
+                <tr><td>Retainer</td><td class="num">$300–$800/mo</td><td class="no">No</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="disclaimer">*Match rate and caps vary by program and approval. Client pays their share; funding covers the rest.</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <h4 class="mini">Discovery-call talking points</h4>
+        <div class="say"><em>Open with the money</em>“Before we talk tools — did you know Ontario is actively funding small businesses to adopt AI? If you qualify, a big chunk of this could be covered. Let's see if you're a fit.”</div>
+        <div class="say"><em>Qualify fast</em>“Two quick things: are you an Ontario for-profit, and are you under 50 employees? Good — that's the sweet spot.”</div>
+        <div class="say"><em>Set honest expectations</em>“I can't promise approval — funding is limited and first-come. What I can do is build you the strongest case and handle the paperwork.”</div>
+        <div class="say"><em>Bridge to the build</em>“The plan we prepare is also the roadmap for the work itself — so nothing's wasted whether or not the grant lands.”</div>
+      </div>
+
+      <div class="callout">
+        <h3>Guardrails — do not cross these</h3>
+        <ul class="clean">
+          <li><b>Never guarantee funding</b> or a specific dollar amount. Say “potential” and “if eligible.”</li>
+          <li><b>Never imply government endorsement</b> of Flower City AI. You're a paid vendor, full stop.</li>
+          <li><b>Verify current intake</b> before you cite a program — windows open and close.</li>
+          <li><b>Don't misrepresent off-the-shelf tools as R&amp;D</b> to fit a grant. Frame projects honestly around real modernization.</li>
+          <li><b>Disclose your role</b> if you help prepare an application — you're the implementer, not an impartial advisor.</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h4 class="mini">Where to point people</h4>
+        <ul class="clean">
+          <li><b>OCI programs:</b> <a href="https://www.oc-innovation.ca" target="_blank" rel="noopener">oc-innovation.ca</a> — confirm DCC/DMAP/TDP intake &amp; eligibility</li>
+          <li><b>COJG status:</b> <a href="https://www.ontario.ca/page/canada-ontario-job-grant-cojg" target="_blank" rel="noopener">ontario.ca/cojg</a> or 1-800-387-5656</li>
+          <li><b>Business registration:</b> <a href="https://www.ontario.ca/page/registering-your-business-name" target="_blank" rel="noopener">ontario.ca</a> — your own $60 first step</li>
+          <li><b>Local network:</b> Brampton Board of Trade — get known as the local AI implementer</li>
+        </ul>
+      </div>
+    </div>
+
+    <p class="disclaimer">Program names, amounts, eligibility, and intake status change frequently and are summarized here from mid-2026 research — always confirm the current details with the program directly before making any commitment to a client. This kit is a sales tool, not legal, tax, or funding advice.</p>
+  </section>
+
+  <footer>
+    <span>Flower City AI · Brampton, ON</span>
+    <span>Grant Go-To-Market Kit · v1 · Part 2 is internal</span>
+  </footer>
+</div>
+
+<script>
+(function () {
+  document.getElementById("printBtn").addEventListener("click", function () { window.print(); });
+  var TKEY = "fcai_theme";
+  var saved = null; try { saved = localStorage.getItem(TKEY); } catch (e) {}
+  if (saved) document.documentElement.setAttribute("data-theme", saved);
+  document.getElementById("themeBtn").addEventListener("click", function () {
+    var cur = document.documentElement.getAttribute("data-theme");
+    if (!cur) cur = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    var next = cur === "dark" ? "light" : "dark";
+    document.documentElement.setAttribute("data-theme", next);
+    try { localStorage.setItem(TKEY, next); } catch (e) {}
+  });
+})();
+</script>
