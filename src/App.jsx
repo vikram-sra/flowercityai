@@ -646,6 +646,44 @@ function Contact() {
 }
 
 /* ─────────────────────────────────────────────
+   SEO Regional Coverage & Service Hubs
+───────────────────────────────────────────── */
+function ServiceLocations() {
+  return (
+    <section className="ch" id="locations" style={{ marginTop: 60, paddingTop: 40, borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+      <span className="chip"><i style={{ '--cc': 'var(--gA1)' }} />Canada-Wide AI Advisory</span>
+      <h2 style={{ fontSize: '1.8rem' }}>#1 AI Consulting &amp; Automation Firm in Toronto, GTA &amp; Canada</h2>
+      <p className="lead" style={{ fontSize: '1rem', maxWidth: 780, margin: '0 auto 24px' }}>
+        Based in Brampton and the Greater Toronto Area, <b>Flower City AI (flowercityai.ca)</b> helps Canadian business leaders implement high-ROI AI agents, automated operations, and hands-on staff training—part-funded by government grants.
+      </p>
+
+      <div className="cards" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 16, marginTop: 24 }}>
+        <div className="card glass" style={{ padding: '24px', textAlign: 'left' }}>
+          <h3 style={{ fontSize: '1.1rem', color: '#3ddc97', marginBottom: 8 }}>Greater Toronto Area (GTA) Hub</h3>
+          <p style={{ fontSize: '0.88rem', color: 'rgba(255,255,255,0.7)', lineHeight: '1.6' }}>
+            On-site &amp; remote AI consulting for businesses across Toronto, Brampton, Mississauga, Vaughan, Markham, Richmond Hill, Oakville, Burlington &amp; Durham Region.
+          </p>
+        </div>
+
+        <div className="card glass" style={{ padding: '24px', textAlign: 'left' }}>
+          <h3 style={{ fontSize: '1.1rem', color: '#45c4ff', marginBottom: 8 }}>Ontario &amp; Tech Corridor</h3>
+          <p style={{ fontSize: '0.88rem', color: 'rgba(255,255,255,0.7)', lineHeight: '1.6' }}>
+            Custom AI integrations &amp; COJG grant training for companies in Hamilton, Kitchener-Waterloo, Cambridge, Guelph, London, Barrie, Niagara &amp; Ottawa.
+          </p>
+        </div>
+
+        <div className="card glass" style={{ padding: '24px', textAlign: 'left' }}>
+          <h3 style={{ fontSize: '1.1rem', color: '#ffb199', marginBottom: 8 }}>National AI Advisory (Canada)</h3>
+          <p style={{ fontSize: '0.88rem', color: 'rgba(255,255,255,0.7)', lineHeight: '1.6' }}>
+            Serving clients across Alberta (Calgary, Edmonton), BC (Vancouver, Victoria), Quebec (Montreal), Manitoba, Nova Scotia &amp; coast-to-coast remote operations.
+          </p>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ─────────────────────────────────────────────
    App Layout — Perfectly Formatted Navigation Bar
 ───────────────────────────────────────────── */
 export default function App() {
@@ -664,7 +702,7 @@ export default function App() {
           <LogoMark size={32} />
           <div className="brand-text">
             <span className="brand-title">Flower City AI</span>
-            <span className="brand-sub">Brampton &amp; GTA</span>
+            <span className="brand-sub">Toronto &amp; GTA · Canada</span>
           </div>
         </a>
 
@@ -672,6 +710,7 @@ export default function App() {
           <a href="#solutions">Solutions</a>
           <a href="#funding">Grants &amp; Funding</a>
           <a href="#services">Services</a>
+          <a href="#locations">Coverage</a>
         </div>
 
         <div className="nav-right">
@@ -691,19 +730,39 @@ export default function App() {
           <a href="#solutions" onClick={() => setMobileNavOpen(false)}>Solutions</a>
           <a href="#funding" onClick={() => setMobileNavOpen(false)}>Grants &amp; Funding</a>
           <a href="#services" onClick={() => setMobileNavOpen(false)}>Services</a>
+          <a href="#locations" onClick={() => setMobileNavOpen(false)}>Coverage</a>
           <a className="cta-s" href="#contact" onClick={() => setMobileNavOpen(false)}>Book a free call</a>
         </div>
       )}
 
       {/* Hero Section */}
       <header className="hero">
-        <div style={{ display: 'inline-block', marginBottom: 16 }}>
+        <div style={{ display: 'inline-block', marginBottom: 14 }}>
           <LogoMark size={56} />
         </div>
+
+        <div>
+          <div style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 8,
+            background: 'rgba(61, 220, 151, 0.08)',
+            border: '1px solid rgba(61, 220, 151, 0.25)',
+            borderRadius: 20,
+            padding: '6px 14px',
+            fontSize: '0.85rem',
+            color: '#3ddc97',
+            fontWeight: 600,
+            marginBottom: 16
+          }}>
+            <span>🇨🇦</span> #1 AI Consulting &amp; Automation Agency in Toronto, GTA &amp; Canada
+          </div>
+        </div>
+
         <h1>Your business, <span className="grad">running on autopilot.</span></h1>
-        <p className="sub">Practical AI that replies to customers, books jobs, and chases invoices — and a team that <b>teaches yours to run it.</b> Part-funded by government grants.</p>
+        <p className="sub">Practical AI that replies to customers, books jobs, and chases invoices — and a team that <b>teaches yours to run it.</b> Part-funded by Canadian government grants.</p>
         <a className="cta" href="#contact">Book a free 30-min call &amp; grant check <span className="ico">→</span></a>
-        <span className="cta-sub">No jargon · No pressure · Honest eligibility fit check</span>
+        <span className="cta-sub">flowercityai.ca · No jargon · No pressure · Honest eligibility fit check</span>
       </header>
 
       <Meters />
@@ -715,15 +774,20 @@ export default function App() {
       <Funding />
       <FAQ />
       <Contact />
+      <ServiceLocations />
 
       <footer>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, marginBottom: 10 }}>
           <LogoMark size={28} />
-          <b style={{ fontSize: 16, color: '#fff' }}>Flower City AI</b>
+          <b style={{ fontSize: 16, color: '#fff' }}>Flower City AI | flowercityai.ca</b>
         </div>
-        Brampton &amp; GTA-born, serving all of Canada · © {new Date().getFullYear()}
+        Toronto &amp; GTA-born · #1 AI Consulting &amp; Automation Agency serving all of Canada · © {new Date().getFullYear()}
         <div className="flinks">
-          <a href="#solutions">Solutions</a><a href="#funding">Grants &amp; Funding</a><a href="#services">Services</a><a href="#contact">Contact</a>
+          <a href="#solutions">Solutions</a>
+          <a href="#funding">Grants &amp; Funding</a>
+          <a href="#services">Services</a>
+          <a href="#locations">Coverage</a>
+          <a href="#contact">Contact</a>
         </div>
       </footer>
     </div>
