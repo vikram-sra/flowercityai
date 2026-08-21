@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import GrantCalculator from './components/GrantCalculator';
 import { LogoMark, WorkflowDiagram, GrantStackGraphic } from './components/Graphics';
 
@@ -9,28 +9,55 @@ import aiLogisticsImg from './assets/ai_logistics.png';
 import aiConcreteImg from './assets/ai_concrete_estimator.png';
 
 /* ─────────────────────────────────────────────
-   Hooks
+   Motion primitives
 ───────────────────────────────────────────── */
-const useReducedMotion = () =>
-  useRef(typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches).current;
+const prefersReduced = () =>
+  typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-/* Reveal-on-scroll hook */
-function useReveal(ref, delay = 3000) {
+const useReducedMotion = () => useRef(prefersReduced()).current;
+
+/* Reveal wrapper: <Rv d={80} v="scale">…</Rv>
+   Reveal state lives in React so re-renders never drop the class. */
+function Rv({ as: Tag = 'div', v = 'up', d = 0, className = '', style, children, ...rest }) {
+  const ref = useRef(null);
+  const [shown, setShown] = useState(false);
+
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
+    if (!('IntersectionObserver' in window)) { setShown(true); return; }
     const obs = new IntersectionObserver(
-      ([e]) => { if (e.isIntersecting) { el.classList.add('in'); obs.disconnect(); } },
-      { threshold: 0.18 }
+      ([e]) => { if (e.isIntersecting) { setShown(true); obs.disconnect(); } },
+      { threshold: 0.1, rootMargin: '0px 0px -6% 0px' }
     );
     obs.observe(el);
-    const t = setTimeout(() => el.classList.add('in'), delay);
-    return () => { obs.disconnect(); clearTimeout(t); };
+    return () => obs.disconnect();
   }, []);
+
+  return (
+    <Tag
+      ref={ref}
+      className={`rv ${shown ? 'in' : ''} ${className}`.replace(/\s+/g, ' ').trim()}
+      data-rv={v}
+      style={{ '--rv-d': `${d}ms`, ...style }}
+      {...rest}
+    >
+      {children}
+    </Tag>
+  );
 }
 
+/* Cursor spotlight — spread onto any .spot surface */
+const spotProps = {
+  onMouseMove: (e) => {
+    const r = e.currentTarget.getBoundingClientRect();
+    e.currentTarget.style.setProperty('--mx', `${e.clientX - r.left}px`);
+    e.currentTarget.style.setProperty('--my', `${e.clientY - r.top}px`);
+  },
+};
+
 /* Animated counter */
-function useCountUp(to, go, duration = 1200) {
+function useCountUp(to, go, duration = 1400) {
   const reduced = useReducedMotion();
   const [val, setVal] = useState(0);
   useEffect(() => {
@@ -50,45 +77,73 @@ function useCountUp(to, go, duration = 1200) {
 }
 
 /* In-view observer */
-function useInView(ref, threshold = 0.35, fallbackMs = 3500) {
+function useInView(ref, threshold = 0.3) {
   const [inView, setInView] = useState(false);
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
+    if (!('IntersectionObserver' in window)) { setInView(true); return; }
     const obs = new IntersectionObserver(
       ([e]) => { if (e.isIntersecting) { setInView(true); obs.disconnect(); } },
       { threshold }
     );
     obs.observe(el);
-    const t = setTimeout(() => setInView(true), fallbackMs);
-    return () => { obs.disconnect(); clearTimeout(t); };
+    return () => obs.disconnect();
   }, []);
   return inView;
 }
 
+/* Word-by-word headline entrance */
+function Words({ text, start = 0, className = '' }) {
+  const words = text.split(' ');
+  return (
+    <span className={`w ${className}`.trim()}>
+      {words.map((word, i) => (
+        <i key={i} style={{ '--i': start + i }}>
+          {word}
+          {i < words.length - 1 ? ' ' : ''}
+        </i>
+      ))}
+    </span>
+  );
+}
+
+/* Section header — one consistent scan anchor for every chapter */
+function Head({ cc, chip, title, lead }) {
+  return (
+    <>
+      <Rv as="span" v="fade" className="chip" style={{ '--cc': cc }}><i style={{ '--cc': cc }} />{chip}</Rv>
+      <Rv as="h2" d={70}>{title}</Rv>
+      {lead && <Rv as="p" className="lead" d={130}>{lead}</Rv>}
+    </>
+  );
+}
+
 /* ─────────────────────────────────────────────
-   Live meters row
+   Live meters
 ───────────────────────────────────────────── */
 function Meters() {
   const ref = useRef(null);
-  const go = useInView(ref, 0.4, 3000);
+  const go = useInView(ref, 0.35);
   const pct = useCountUp(80, go);
   const reply = useCountUp(4, go);
   const hours = useCountUp(15, go);
   const [time, setTime] = useState('');
+
   useEffect(() => {
     const tick = () => setTime(new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }));
     tick();
     const iv = setInterval(tick, 15000);
     return () => clearInterval(iv);
   }, []);
+
   const C = 106.8;
 
   return (
     <div className="meters" ref={ref}>
-      <div className="meter glass">
+      <div className="meter glass spot" style={{ '--i': 0 }} {...spotProps}>
         <span className="ring">
-          <svg width="42" height="42" viewBox="0 0 42 42">
+          <svg width="40" height="40" viewBox="0 0 42 42" aria-hidden="true">
             <circle className="track" cx="21" cy="21" r="17" fill="none" strokeWidth="4" />
             <circle className="arc" cx="21" cy="21" r="17" fill="none" stroke="#3ddc97" strokeWidth="4"
               strokeDasharray={C} strokeDashoffset={go ? C * 0.2 : C} />
@@ -97,224 +152,264 @@ function Meters() {
         </span>
         <span><span className="lbl">Busywork automatable</span><span className="val">of a typical week</span></span>
       </div>
-      <div className="meter glass">
-        <span><span className="lbl"><span className="dotlive" />Live local time</span><span className="val">{time}</span></span>
+      <div className="meter glass spot" style={{ '--i': 1 }} {...spotProps}>
+        <span><span className="lbl"><span className="dotlive" />Local time</span><span className="val">{time}</span></span>
       </div>
-      <div className="meter glass">
-        <span><span className="lbl">Avg. AI reply time</span><span className="val">{reply} sec</span></span>
+      <div className="meter glass spot" style={{ '--i': 2 }} {...spotProps}>
+        <span><span className="lbl">Avg. AI reply</span><span className="val">{reply} sec</span></span>
       </div>
-      <div className="meter glass">
-        <span><span className="lbl">Hours saved per team</span><span className="val">{hours}+ /wk</span></span>
+      <div className="meter glass spot" style={{ '--i': 3 }} {...spotProps}>
+        <span><span className="lbl">Hours saved</span><span className="val">{hours}+ /wk</span></span>
       </div>
     </div>
   );
 }
 
 /* ─────────────────────────────────────────────
-   USP Section — Translating Technical Friction
+   Marquee
 ───────────────────────────────────────────── */
-function USPSection() {
-  const stageRef = useRef(null);
-  useReveal(stageRef);
+const SERVED = [
+  'Concrete & Reno', 'Logistics', 'Restaurants', 'Real Estate', 'Field Services',
+  'Trades', 'Wholesale', 'Clinics', 'Auto Shops', 'Property Management',
+];
 
+function Marquee() {
+  return (
+    <div className="marquee" aria-hidden="true">
+      <div className="track">
+        {[...SERVED, ...SERVED].map((s, i) => <span key={i}>{s}</span>)}
+      </div>
+    </div>
+  );
+}
+
+/* ─────────────────────────────────────────────
+   Problem / solution
+───────────────────────────────────────────── */
+const WITHOUT = [
+  'Quotes answered at 11pm — by you',
+  'After-hours leads go to competitors',
+  'Staff buried in data entry',
+  'Software bought, never used',
+  'Grants left on the table',
+];
+
+const WITH = [
+  'AI replies and books jobs, 24/7',
+  'Your team trained in one day',
+  'Invoices chased automatically',
+  'Plain-English audit before any build',
+  'We file the grant paperwork',
+];
+
+function USPSection() {
   return (
     <section className="ch" id="solutions">
-      <span className="chip"><i style={{ '--cc': 'var(--gA1)' }} />The Core Problem We Solve</span>
-      <h2>Translating the invisible layer of technical friction.</h2>
-      <p className="lead">Your business doesn't need another software subscription you don't know how to use. You need a dedicated partner to translate AI into real revenue &amp; saved hours.</p>
+      <Head
+        cc="var(--gA1)"
+        chip="The problem"
+        title="Where your week actually goes."
+        lead="Same business, two operating systems."
+      />
 
-      <div className="usp-grid reveal" ref={stageRef}>
-        <div className="usp-card glass friction">
-          <div className="card-badge red">❌ Without Flower City AI</div>
-          <h3>Invisible Technical Friction</h3>
+      <div className="usp-grid">
+        <Rv v="left" className="usp-card glass spot friction" d={0} {...spotProps}>
+          <div className="card-badge red">Without us</div>
+          <h3>Invisible friction</h3>
           <ul className="usp-list">
-            <li>Owner spends late nights answering quotes, emails &amp; scheduling manually.</li>
-            <li>Inquiries missed outside business hours convert straight to competitors.</li>
-            <li>Staff are overwhelmed with data entry, paper invoices &amp; repetitive follow-ups.</li>
-            <li>Confusion over complex AI tools leads to wasted budgets and abandoned software.</li>
-            <li>Zero knowledge of eligible federal and provincial grants to cover costs.</li>
+            {WITHOUT.map((t) => <li key={t}>{t}</li>)}
           </ul>
-        </div>
+        </Rv>
 
-        <div className="usp-card glass solution">
-          <div className="card-badge green">✅ With Flower City AI</div>
-          <h3>Smooth Operational Translation</h3>
+        <Rv v="right" className="usp-card glass spot solution" d={90} {...spotProps}>
+          <div className="card-badge green">With us</div>
+          <h3>Work that runs itself</h3>
           <ul className="usp-list">
-            <li>AI answers, books jobs &amp; dispatches details 24/7 on WhatsApp, web &amp; phone.</li>
-            <li>Hands-on workshops train your actual staff to master daily AI tools in 1 day.</li>
-            <li>Automated workflow integrations chase invoices and update records automatically.</li>
-            <li>Plain-English audits identify exact ROI before writing a single line of code.</li>
-            <li>We handle grant applications to cover 50% to 83%+ of your funding costs.</li>
+            {WITH.map((t) => <li key={t}>{t}</li>)}
           </ul>
-        </div>
+        </Rv>
       </div>
 
-      {/* Vector Architecture Diagram */}
-      <div style={{ marginTop: 28 }}>
+      <Rv v="scale" d={60} style={{ marginTop: 14 }}>
         <WorkflowDiagram />
-      </div>
+      </Rv>
     </section>
   );
 }
 
 /* ─────────────────────────────────────────────
-   Interactive Dual Demo Stage (Chat & Auto-Invoicing)
+   Demo stage
 ───────────────────────────────────────────── */
 const DEMO_CHAT = [
   { c: 'cust', who: 'Customer', t: 'hey, open tomorrow? need a brake check on my truck' },
-  { c: 'ai', who: 'AI · Village Auto Care', t: 'We are! 9:30 AM or 2:00 PM free — which suits you?' },
+  { c: 'ai', who: 'AI · Village Auto Care', t: "We are — 9:30 AM or 2:00 PM. Which suits you?" },
   { c: 'cust', who: '', t: '9:30 please 🙏' },
-  { c: 'ai', who: '', t: 'Booked ✓ 9:30 AM brake check. Confirmation sent — see you then!' },
+  { c: 'ai', who: '', t: 'Booked ✓ 9:30 AM brake check. Confirmation sent.' },
 ];
 
 const DEMO_INVOICE = [
-  { c: 'system', who: 'System Event', t: '🚛 Driver completed Load #402 (Brampton -> Mississauga)' },
-  { c: 'ai', who: 'AI Automation Engine', t: 'POD document scanned &amp; verified. Generating Invoice #8920 ($1,450.00 CAD)...' },
-  { c: 'cust', who: 'Broker Accounts', t: 'Invoice received. Quick Payment link clicked.' },
-  { c: 'ai', who: 'Payment System', t: '✓ Paid $1,450.00 CAD. QuickBooks &amp; CRM updated automatically!' },
+  { c: 'system', who: 'Event', t: '🚛 Load #402 delivered — Brampton → Mississauga' },
+  { c: 'ai', who: 'Automation engine', t: 'POD verified. Invoice #8920 generated — $1,450.00 CAD' },
+  { c: 'cust', who: 'Broker accounts', t: 'Invoice received. Payment link clicked.' },
+  { c: 'ai', who: 'Payment system', t: '✓ Paid $1,450.00. QuickBooks + CRM updated.' },
 ];
 
-function DemoStage() {
-  const [activeDemo, setActiveDemo] = useState('chat');
-  const reduced = useReducedMotion();
-  const stageRef = useRef(null);
-  useReveal(stageRef);
+const DEMOS = {
+  chat: { list: DEMO_CHAT, label: '24/7 customer AI', tab: 'Midnight booking' },
+  invoice: { list: DEMO_INVOICE, label: 'Dispatch → invoice', tab: 'Dispatch → invoice' },
+};
 
-  const currentList = activeDemo === 'chat' ? DEMO_CHAT : DEMO_INVOICE;
-  const [shown, setShown] = useState(reduced ? currentList.length : 0);
+function DemoStage() {
+  const [active, setActive] = useState('chat');
+  const reduced = useReducedMotion();
+  const list = DEMOS[active].list;
+  const [shown, setShown] = useState(reduced ? list.length : 0);
+  const [typing, setTyping] = useState(false);
 
   useEffect(() => {
-    if (reduced) return;
+    if (reduced) { setShown(list.length); return; }
     setShown(0);
-    let t;
+    setTyping(false);
+    let timers = [];
+    const clear = () => { timers.forEach(clearTimeout); timers = []; };
+
     const advance = (n) => {
-      if (n > currentList.length) { t = setTimeout(() => { setShown(0); advance(1); }, 5200); return; }
+      if (n > list.length) {
+        timers.push(setTimeout(() => { setShown(0); advance(1); }, 4800));
+        return;
+      }
       setShown(n);
-      t = setTimeout(() => advance(n + 1), 1200);
+      setTyping(n < list.length);
+      timers.push(setTimeout(() => advance(n + 1), 1400));
     };
     advance(1);
-    return () => clearTimeout(t);
-  }, [activeDemo, reduced]);
+    return clear;
+  }, [active, reduced]);
 
   return (
     <section className="ch" id="demo">
-      <span className="chip"><i style={{ '--cc': 'var(--gA1)' }} />Live interactive demos</span>
-      <h2>See AI automations in action.</h2>
-      <p className="lead">Test real workflows running end-to-end without human intervention.</p>
+      <Head
+        cc="var(--gA1)"
+        chip="Live demo"
+        title="Watch it run."
+        lead="Two real workflows, start to finish, with nobody at the keyboard."
+      />
 
-      {/* Demo Switcher Tabs */}
-      <div className="ind-tabs" style={{ marginBottom: 18 }}>
-        <button
-          type="button"
-          className={`ind-tab ${activeDemo === 'chat' ? 'active' : ''}`}
-          onClick={() => setActiveDemo('chat')}
-        >
-          💬 Demo 1: 24/7 Midnight Customer Booking
-        </button>
-        <button
-          type="button"
-          className={`ind-tab ${activeDemo === 'invoice' ? 'active' : ''}`}
-          onClick={() => setActiveDemo('invoice')}
-        >
-          ⚡ Demo 2: Instant Dispatch &amp; Invoice Chaser
-        </button>
-      </div>
+      <Rv v="fade" className="ind-tabs">
+        {Object.entries(DEMOS).map(([key, d]) => (
+          <button
+            key={key}
+            type="button"
+            className={`ind-tab ${active === key ? 'active' : ''}`}
+            onClick={() => setActive(key)}
+          >
+            {d.tab}
+          </button>
+        ))}
+      </Rv>
 
-      <div className="stage chat reveal" ref={stageRef}>
-        <div className="hud" style={{ top: 18, left: 18 }}>
-          <span className="k">Workflow</span><b>{activeDemo === 'chat' ? '24/7 Customer AI' : 'Dispatch &amp; Invoice AI'}</b>
+      <Rv v="scale" className="stage chat" d={60}>
+        <div className="hud" style={{ top: 16, left: 16, '--i': 0 }}>
+          <span className="k">Workflow</span><b>{DEMOS[active].label}</b>
         </div>
-        <div className="hud" style={{ top: 18, right: 18 }}>
-          <span className="k">Execution Time</span><b>3.2 sec</b>
+        <div className="hud" style={{ top: 16, right: 16, '--i': 1 }}>
+          <span className="k">Runtime</span><b>3.2s</b>
         </div>
-        <div className="hud" style={{ bottom: 18, right: 18 }}>
+        <div className="hud" style={{ bottom: 16, right: 16, '--i': 2 }}>
           <span className="k">Status</span><b>Active ⚡</b>
         </div>
 
         <div className="chatcol">
-          {currentList.slice(0, shown).map((m, i) => (
-            <div key={`${activeDemo}-${i}`} className={`gb ${m.c} ${reduced ? '' : 'show'}`}
-              style={reduced ? { opacity: 1, transform: 'none' } : undefined}>
+          {list.slice(0, shown).map((m, i) => (
+            <div
+              key={`${active}-${i}`}
+              className={`gb ${m.c} ${reduced ? 'show' : 'show'}`}
+            >
               {m.who && <span className="who">{m.who}</span>}
               {m.t}
             </div>
           ))}
+          {!reduced && typing && shown > 0 && (
+            <div className={`gb show ${list[shown]?.c === 'ai' ? 'ai' : 'cust'}`} style={{ padding: '10px 15px' }}>
+              <span className="typing"><i /><i /><i /></span>
+            </div>
+          )}
         </div>
-      </div>
-      <p className="cap">Every step is completed automatically in the background while you focus on your business.</p>
+      </Rv>
+      <p className="cap">Runs in the background while you get on with the job.</p>
     </section>
   );
 }
 
 /* ─────────────────────────────────────────────
-   Industry Use Cases Section
+   Industries
 ───────────────────────────────────────────── */
 const INDUSTRIES = [
   {
     id: 'reno',
-    name: '🏗️ Concrete & Home Reno (Brampton)',
-    stat: '~2,800 Brampton & GTA Contractors',
-    headline: 'AI Concrete Estimator & Live Texture Visualizer for Driveways & Renovations',
+    name: '🏗️ Concrete & Reno',
+    stat: '~2,800 Brampton & GTA contractors',
+    headline: 'Quote a driveway before you drive out to it.',
     image: aiConcreteImg,
     points: [
-      'Live AI area measurement & driveway quote calculator (1,200 SQ FT = $16,800 CAD)',
-      'Instant visual texture preview generator (Broom Finish, Stamped Slate, Exposed Aggregate)',
-      'Automated customer quote PDF generator & instant deposit payment collection'
-    ]
+      'AI measures the area and prices it instantly',
+      'Texture preview: broom, stamped, aggregate',
+      'PDF quote sent, deposit collected',
+    ],
   },
   {
     id: 'retail',
-    name: '🍽️ Retail & Digital Restaurant Menus',
-    stat: '~4,000 GTA Firms',
-    headline: 'Digital Interactive Menus, Table Bookings & Instant QR Ordering',
+    name: '🍽️ Retail & Restaurants',
+    stat: '~4,000 GTA firms',
+    headline: 'Menus, bookings and QR ordering that run themselves.',
     image: aiRestaurantImg,
     points: [
-      'Interactive digital restaurant menu boards with live AI ordering',
-      '24/7 AI table reservation booking system with SMS customer confirmations',
-      'Automated menu stockout alerts & instant order dispatching to kitchen POS'
-    ]
+      'Interactive menus with live AI ordering',
+      '24/7 table booking with SMS confirmations',
+      'Stockout alerts pushed straight to the POS',
+    ],
   },
   {
     id: 'logistics',
-    name: '🚛 Logistics & Transportation',
-    stat: '~1,500 GTA Firms',
-    headline: 'Eliminate Dispatch Bottlenecks & Manual BOL Paperwork',
+    name: '🚛 Logistics',
+    stat: '~1,500 GTA firms',
+    headline: 'No more dispatch bottlenecks or BOL paperwork.',
     image: aiLogisticsImg,
     points: [
-      'Automated load status & POD document processing',
-      'AI-powered route optimization and driver dispatching',
-      'Instant rate quotes and automated broker email parsing'
-    ]
+      'PODs scanned, load status auto-updated',
+      'Route optimization and driver dispatch',
+      'Broker emails parsed into instant quotes',
+    ],
   },
   {
     id: 'services',
-    name: '💼 Professional & Field Services',
-    stat: '~3,000 GTA Firms',
-    headline: 'Stop Chasing Paperwork, Invoices & Calendar Schedules',
+    name: '💼 Field & Professional',
+    stat: '~3,000 GTA firms',
+    headline: 'Stop chasing paperwork, invoices and calendars.',
     image: aiWorkshopImg,
     points: [
-      'Auto-generate customer quotes & job confirmations',
-      'Automated invoice follow-ups & payment reminders via SMS/email',
-      'CRM sync and document summarization for fast client reviews'
-    ]
-  }
+      'Quotes and job confirmations auto-generated',
+      'Invoice reminders by SMS and email',
+      'CRM sync plus document summaries',
+    ],
+  },
 ];
 
 function IndustrySolutions() {
   const [activeTab, setActiveTab] = useState('reno');
-  const stageRef = useRef(null);
-  useReveal(stageRef);
-
-  const ind = INDUSTRIES.find(i => i.id === activeTab) || INDUSTRIES[0];
+  const ind = INDUSTRIES.find((i) => i.id === activeTab) || INDUSTRIES[0];
 
   return (
-    <section className="ch">
-      <span className="chip"><i style={{ '--cc': 'var(--gB1)' }} />Tailored Solutions</span>
-      <h2>Built for Brampton &amp; GTA Businesses.</h2>
-      <p className="lead">Practical AI integrations designed for local contractors, restaurants, transport fleets, and professional services.</p>
+    <section className="ch" id="industries">
+      <Head
+        cc="var(--gB1)"
+        chip="Built for your trade"
+        title="Pick your industry."
+        lead="Same engine, tuned to how your work actually happens."
+      />
 
-      <div className="ind-tabs">
-        {INDUSTRIES.map(i => (
+      <Rv v="fade" className="ind-tabs">
+        {INDUSTRIES.map((i) => (
           <button
             key={i.id}
             type="button"
@@ -324,16 +419,16 @@ function IndustrySolutions() {
             {i.name}
           </button>
         ))}
-      </div>
+      </Rv>
 
-      <div className="ind-card glass reveal" ref={stageRef}>
+      <Rv v="scale" className="ind-card glass spot" d={60} {...spotProps}>
         <div className="ind-header-grid">
           <div>
             <span className="ind-stat">{ind.stat}</span>
             <h3>{ind.headline}</h3>
-            <div className="ind-grid" style={{ marginTop: 16 }}>
+            <div className="ind-grid" style={{ marginTop: 14 }}>
               {ind.points.map((pt, idx) => (
-                <div key={idx} className="ind-item glass">
+                <div key={`${ind.id}-${idx}`} className="ind-item glass" style={{ '--i': idx }}>
                   <span className="ind-num">0{idx + 1}</span>
                   <p>{pt}</p>
                 </div>
@@ -341,16 +436,16 @@ function IndustrySolutions() {
             </div>
           </div>
           <div className="ind-img-col">
-            <img src={ind.image} alt={ind.name} className="ind-feature-img" />
+            <img key={ind.id} src={ind.image} alt={ind.name} className="ind-feature-img" loading="lazy" />
           </div>
         </div>
-      </div>
+      </Rv>
     </section>
   );
 }
 
 /* ─────────────────────────────────────────────
-   Education stage with skill meters
+   Education
 ───────────────────────────────────────────── */
 const SKILLS = [
   { label: 'Everyday AI use', v: 86 },
@@ -384,37 +479,39 @@ function SkillBar({ label, v, invert, color, go }) {
   );
 }
 
+const EDU_TAGS = ['✍️ Writing & quotes', '📅 Scheduling', '📄 Paperwork', '💬 Customer replies'];
+
 function Education() {
   const stageRef = useRef(null);
-  useReveal(stageRef);
-  const go = useInView(stageRef);
+  const go = useInView(stageRef, 0.3);
+
   return (
     <section className="ch" id="learn">
-      <span className="chip"><i style={{ '--cc': 'var(--gB1)' }} />Education first</span>
-      <h2>We teach before we build.</h2>
-      <p className="lead">Tools you don't understand become tools you don't use. After your consultation, <b>education comes before any build</b> — so your team owns the AI, not the other way around.</p>
-      
-      <div className="stage edu reveal" ref={stageRef}>
-        <div className="eduCopy">
-          <h3>Your team, fluent in AI in one day.</h3>
-          <p>Hands-on workshops on your real work — quoting, emails, scheduling, paperwork. No slides full of theory. No jargon. Ever.</p>
-          <div className="tags">
-            <span className="tag">✍️ Writing &amp; quotes</span>
-            <span className="tag">📅 Scheduling</span>
-            <span className="tag">📄 Paperwork</span>
-            <span className="tag">💬 Customer replies</span>
-          </div>
+      <Head
+        cc="var(--gB1)"
+        chip="Education first"
+        title="We teach before we build."
+        lead="Tools nobody understands become tools nobody uses."
+      />
 
+      <Rv v="scale" className="stage edu" d={60}>
+        <div className="eduCopy" ref={stageRef}>
+          <h3>Fluent in AI by end of day.</h3>
+          <p>Hands-on, on your real work — quoting, email, scheduling, paperwork. No theory, no jargon.</p>
+          <div className="tags">
+            {EDU_TAGS.map((t, i) => <span className="tag" key={t} style={{ '--i': i }}>{t}</span>)}
+          </div>
           <div className="workshop-img-box">
-            <img src={aiWorkshopImg} alt="AI Team Workshop" className="workshop-img" />
+            <img src={aiWorkshopImg} alt="AI team workshop in session" className="workshop-img" loading="lazy" />
           </div>
         </div>
         <div className="eduCard">
           <h3>Team skill meter</h3>
           <p className="small">A typical crew, before lunch vs. after.</p>
-          {SKILLS.map(s => <SkillBar key={s.label} {...s} go={go} />)}
+          {SKILLS.map((s) => <SkillBar key={s.label} {...s} go={go} />)}
+          <p className="eduFoot">Measured before and after every workshop.</p>
         </div>
-      </div>
+      </Rv>
     </section>
   );
 }
@@ -422,28 +519,45 @@ function Education() {
 /* ─────────────────────────────────────────────
    Services
 ───────────────────────────────────────────── */
+const SERVICES = [
+  {
+    cc: 'var(--gA1)', pop: 'Start here', step: 'Consult · 01',
+    title: 'Readiness audit',
+    desc: 'Free call, then a plain-English audit: where your hours leak and what fixing it is worth. Grant applications need this exact document.',
+    price: '$500', unit: 'from',
+  },
+  {
+    cc: 'var(--gB1)', step: 'Teach · 02',
+    title: 'Team AI training',
+    desc: 'One hands-on day. Staff leave using AI on their real work. COJG covers up to 83% per employee when intakes are open.',
+    price: '$500', unit: 'from',
+  },
+  {
+    cc: 'var(--gC1)', step: 'Build · 03',
+    title: 'Automations built',
+    desc: 'Replies, bookings, invoicing — live in weeks. OCI Tech Demo matches 50% up to $50,000 for qualifying businesses.',
+    price: '$1,000', unit: 'from',
+  },
+];
+
 function Services() {
-  const refs = [useRef(null), useRef(null), useRef(null)];
-  refs.forEach(r => useReveal(r));
-  const cards = [
-    { ref: refs[0], cc: 'var(--gA1)', pop: 'Start here', step: 'Consult · 01', title: 'The readiness consultation', desc: 'A free call, then a plain-English audit: where your hours leak and what fixing it is worth — the exact document grant applications require.', price: 'from $500' },
-    { ref: refs[1], cc: 'var(--gB1)', step: 'Teach · 02', title: 'AI training for your team', desc: 'One hands-on day. Your staff leave using AI on their actual work. Ontario Job Grants (COJG) cover up to 83%+ of training costs per employee.', price: 'from $500' },
-    { ref: refs[2], cc: 'var(--gC1)', step: 'Build · 03', title: 'Automations, built for you', desc: 'Replies, bookings, invoicing — live in weeks. OCI Tech Demo grants matched 50% up to $50,000 for qualifying businesses.', price: 'from $1,000' },
-  ];
   return (
     <section className="ch" id="services">
-      <span className="chip"><i style={{ '--cc': 'var(--gD1)' }} />Services</span>
-      <h2>Three ways to start.</h2>
-      <p className="lead">Consultation first. Training next. Automation when the plan says it pays.</p>
+      <Head
+        cc="var(--gD1)"
+        chip="Services"
+        title="Three ways to start."
+        lead="Consultation first. Training next. Automation when the numbers say it pays."
+      />
       <div className="cards">
-        {cards.map(c => (
-          <div key={c.step} className="card glass reveal" ref={c.ref} style={{ '--cc': c.cc }}>
+        {SERVICES.map((c, i) => (
+          <Rv key={c.step} className="card glass spot" d={i * 90} style={{ '--cc': c.cc }} {...spotProps}>
             {c.pop && <span className="pop">{c.pop}</span>}
             <span className="step">{c.step}</span>
             <h3>{c.title}</h3>
             <p>{c.desc}</p>
-            <span className="price">{c.price}</span>
-          </div>
+            <span className="price"><small>{c.unit} </small>{c.price}</span>
+          </Rv>
         ))}
       </div>
     </section>
@@ -451,102 +565,59 @@ function Services() {
 }
 
 /* ─────────────────────────────────────────────
-   Funding & Grant Facts Section
+   Funding
 ───────────────────────────────────────────── */
 const GRANT_FACTS = [
-  {
-    title: 'OCI DCC — Tech Demonstration',
-    level: 'Ontario Provincial',
-    amount: 'Up to $50,000',
-    cov: '50% Matched Grant',
-    desc: 'Provides 50% matched funding for SMEs to install and deploy digital tools, voice AI, automated workflows, and software.',
-    badge: 'Adoption & Rollout'
-  },
-  {
-    title: 'OCI DCC — Digital Modernization',
-    level: 'Ontario Provincial',
-    amount: 'Up to $15,000',
-    cov: '50% Matched Strategy',
-    desc: 'Covers 50% of consulting costs for AI readiness audits, digital transformation strategies, and architecture design.',
-    badge: 'Strategy & Audit'
-  },
-  {
-    title: 'Ontario Job Grant (OJG / COJG)',
-    level: 'Ontario / Federal',
-    amount: 'Up to $10K–$15K',
-    cov: '50% – 83%+ Covered',
-    desc: 'Funding to upskill existing staff or new hires on AI productivity tools through eligible third-party trainers.',
-    badge: 'Team Upskilling'
-  },
-  {
-    title: 'NRC IRAP & AI Assist',
-    level: 'Federal (Canada)',
-    amount: 'Salary Subsidies',
-    cov: '50% – 80% Tech Salaries',
-    desc: 'Direct payroll support covering 50% to 80% of internal developer and technical contractor salaries for custom AI R&D.',
-    badge: 'Custom AI Build'
-  },
-  {
-    title: 'SR&ED + OITC Tax Credit',
-    level: 'Federal & Ontario',
-    amount: 'Tax Cash-Back',
-    cov: 'Up to 75%–80% Stacking',
-    desc: 'Combines 35%-69% Federal SR&ED tax credits with 8% Ontario Innovation Tax Credit on proprietary R&D labor.',
-    badge: 'R&D Tax Recovery'
-  },
-  {
-    title: 'Critical Industrial Technologies (CIT)',
-    level: 'Ontario Regional',
-    amount: 'Up to $200,000',
-    cov: '50% Matched',
-    desc: 'Supports SMEs deploying AI, robotics, and workflow automation in logistics, manufacturing, agri-food, and mining.',
-    badge: 'Logistics & Supply Chain'
-  }
+  { title: 'OCI DCC — Tech Demonstration', level: 'Ontario', badge: 'Rollout', amount: 'Up to $50K', cov: '50% matched', desc: 'Deploy voice AI, workflows and software.' },
+  { title: 'OCI DCC — Digital Modernization', level: 'Ontario', badge: 'Strategy', amount: 'Up to $15K', cov: '50% matched', desc: 'Readiness audits and transformation strategy.' },
+  { title: 'Ontario Job Grant (COJG)', level: 'Ontario / Federal', badge: 'Upskilling', amount: '$10K–$15K', cov: '50–83% covered', desc: 'Staff training via an eligible third-party trainer.' },
+  { title: 'NRC IRAP & AI Assist', level: 'Federal', badge: 'Custom build', amount: 'Salary subsidy', cov: '50–80% of wages', desc: 'Payroll support for custom AI R&D.' },
+  { title: 'SR&ED + OITC', level: 'Federal & Ontario', badge: 'Tax recovery', amount: 'Cash back', cov: 'Up to 75–80%', desc: 'Refunds on proprietary R&D labour.' },
+  { title: 'Critical Industrial Technologies', level: 'Ontario', badge: 'Supply chain', amount: 'Up to $200K', cov: '50% matched', desc: 'AI and robotics in logistics and manufacturing.' },
 ];
 
 function Funding() {
-  const stageRef = useRef(null);
-  useReveal(stageRef);
-
   return (
     <section className="ch" id="funding">
-      <span className="chip"><i style={{ '--cc': 'var(--gC1)' }} />Government Grants &amp; Subsidies</span>
-      <h2>The government helps pay.</h2>
-      <p className="lead">Canada and Ontario actively co-fund small business AI adoption, staff upskilling, and technical builds. We check your eligibility and handle the paperwork.</p>
+      <Head
+        cc="var(--gC1)"
+        chip="Government grants"
+        title="The government helps pay."
+        lead="We check what you qualify for and handle the paperwork."
+      />
 
-      {/* Vector Stacking Graphic */}
-      <GrantStackGraphic />
+      <Rv v="fade">
+        <GrantStackGraphic />
+      </Rv>
 
-      {/* Grant Matrix Cards */}
-      <div className="grant-matrix" style={{ marginTop: 24 }}>
+      <div className="grant-matrix">
         {GRANT_FACTS.map((g, idx) => (
-          <div key={idx} className="g-card glass">
+          <Rv key={g.title} className="g-card glass spot" d={(idx % 3) * 70} {...spotProps}>
             <div className="g-card-top">
               <span className="g-level">{g.level}</span>
               <span className="g-badge">{g.badge}</span>
             </div>
             <h4>{g.title}</h4>
+            <p style={{ fontSize: 13, color: 'var(--sub)', margin: '0 0 12px', lineHeight: 1.4 }}>{g.desc}</p>
             <div className="g-stat-row">
               <span className="g-amt">{g.amount}</span>
               <span className="g-cov">{g.cov}</span>
             </div>
-            <p>{g.desc}</p>
-          </div>
+          </Rv>
         ))}
       </div>
 
-      {/* Interactive Grant Calculator */}
-      <div style={{ marginTop: 40 }}>
+      <Rv v="scale" style={{ marginTop: 32 }}>
         <GrantCalculator />
-      </div>
+      </Rv>
 
-      <div className="stage money reveal" ref={stageRef} style={{ marginTop: 36 }}>
-        <span className="fsub">Building Custom Tech Stacking Strategy</span>
+      <Rv v="scale" className="stage money" style={{ marginTop: 28 }}>
+        <span className="fsub">Stacked federal + provincial</span>
         <div className="fundNum">Up to 80%</div>
-        <span className="fsub">of technical developer salaries offset by combining IRAP + SR&amp;ED + OITC</span>
-        <p className="fine2">Adopting off-the-shelf AI? <b>OCI DCC Tech Demonstration &amp; Ontario Job Grants</b> offset 50% to 83% of adoption and training costs.</p>
-        <p className="fine">Funding is limited and allocated on intake cycles. We confirm active eligibility before promising any figures.</p>
-      </div>
+        <span className="fsub">of technical salaries offset — IRAP + SR&amp;ED + OITC</span>
+        <p className="fine2">Adopting off-the-shelf AI instead? OCI DCC and the Ontario Job Grant offset 50–83% of adoption and training.</p>
+        <p className="fine">Intakes open and close. We confirm live eligibility before quoting a number.</p>
+      </Rv>
     </section>
   );
 }
@@ -555,28 +626,26 @@ function Funding() {
    FAQ
 ───────────────────────────────────────────── */
 const FAQS = [
-  { q: 'Will AI replace my staff?', a: 'No — it takes repetitive busywork off their plate so they can focus on high-value work. That\'s why we teach your team first before automating.' },
-  { q: 'I\'m not technical. Is that a problem?', a: 'That is exactly who we serve. We translate the invisible layer of technical friction into plain English. If you can send a text message, you are fully qualified.' },
-  { q: 'What does it cost?', a: 'Readiness audits & training start at $500. Automations start from $1,000. Ongoing maintenance from $300/month. First consultation call is 100% free — and grants cover 50% to 83%+ of costs.' },
-  { q: 'Are these government grants actually real?', a: 'Yes. Ontario\'s OCI DCC programs provide up to $65,000 matched funding ($15K strategy + $50K Tech Demo), Ontario Job Grants cover up to $10,000–$15,000 per employee for training, and NRC IRAP + SR&ED cover developer labor for custom R&D. We confirm what is live for your business before submitting.' },
-  { q: 'How fast do I see results?', a: 'Training pays off the same day. Workflows and chatbots go live within 2–4 weeks of your audit.' },
+  { q: 'Will AI replace my staff?', a: 'No. It takes the repetitive busywork off their plate so they do the work that actually pays. That is why we train your team before we automate anything.' },
+  { q: "I'm not technical. Problem?", a: 'That is exactly who we serve. If you can send a text message, you are qualified.' },
+  { q: 'What does it cost?', a: 'Audits and training from $500. Automations from $1,000. Maintenance from $300/month. The first call is free — and grants routinely cover 50–83%.' },
+  { q: 'Are the grants real?', a: 'Yes. OCI DCC offers up to $65K matched ($15K strategy + $50K rollout), the Ontario Job Grant up to $15K per employee, and IRAP + SR&ED cover developer labour. We confirm what is open before submitting anything.' },
+  { q: 'How fast do I see results?', a: 'Training pays off the same day. Workflows and chatbots go live 2–4 weeks after the audit.' },
 ];
 
 function FAQ() {
   const [open, setOpen] = useState(-1);
   return (
     <section className="ch" id="faq">
-      <span className="chip"><i style={{ '--cc': 'var(--gD2)' }} />FAQ</span>
-      <h2>Straight answers.</h2>
-      <p className="lead">The five things every owner asks first.</p>
+      <Head cc="var(--gD2)" chip="FAQ" title="Straight answers." lead="The five things every owner asks first." />
       <div className="faq">
         {FAQS.map((f, i) => (
-          <div key={f.q} className={`qa glass ${open === i ? 'open' : ''}`}>
-            <button type="button" onClick={() => setOpen(open === i ? -1 : i)}>
-              {f.q}<span className="pm">+</span>
+          <Rv key={f.q} className={`qa glass ${open === i ? 'open' : ''}`} d={i * 55}>
+            <button type="button" aria-expanded={open === i} onClick={() => setOpen(open === i ? -1 : i)}>
+              {f.q}<span className="pm" aria-hidden="true">+</span>
             </button>
             <div className="a"><p>{f.a}</p></div>
-          </div>
+          </Rv>
         ))}
       </div>
     </section>
@@ -587,10 +656,12 @@ function FAQ() {
    Contact — wired to Google Forms
 ───────────────────────────────────────────── */
 function Contact() {
-  const [submitted, setSubmitted] = useState(false);
+  const [status, setStatus] = useState('idle');
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (status === 'sending') return;
+    setStatus('sending');
     const formData = new FormData(e.target);
     const googleFormData = new FormData();
     googleFormData.append('entry.1395438875', formData.get('name'));
@@ -601,24 +672,29 @@ function Contact() {
     googleFormData.append('entry.913858987', formData.get('pain_point'));
     fetch('https://docs.google.com/forms/d/e/1FAIpQLSdFKWq1ojAeCN217B0BKPIlvlt4LUUxuhxf0WmGqXTq5eNVaQ/formResponse', {
       method: 'POST', mode: 'no-cors', body: googleFormData,
-    }).then(() => setSubmitted(true)).catch(() => setSubmitted(true));
+    })
+      .then(() => setStatus('done'))
+      .catch(() => setStatus('done'));
   };
 
   return (
     <section className="ch" id="contact">
-      <span className="chip"><i style={{ '--cc': 'var(--gD1)' }} />Book a call</span>
-      <h2>Thirty minutes. Zero jargon.</h2>
-      <p className="lead">Walk away knowing exactly what AI could do for your business — and which government grants you qualify for.</p>
+      <Head
+        cc="var(--gD1)"
+        chip="Book a call"
+        title="Thirty minutes. Zero jargon."
+        lead="Find out what AI does for your business — and which grants you qualify for."
+      />
       <div className="contact">
-        {submitted ? (
+        {status === 'done' ? (
           <div className="form glass">
             <div className="ok">
-              <b>Got it — we'll be in touch! 🎉</b>
+              <b>Got it — talk soon 🎉</b>
               <p>We reply within 24 hours, GTA time.</p>
             </div>
           </div>
         ) : (
-          <form className="form glass" onSubmit={handleSubmit}>
+          <Rv as="form" v="scale" className="form glass spot" onSubmit={handleSubmit} {...spotProps}>
             <div className="frow">
               <input required type="text" name="name" placeholder="Your name" aria-label="Your name" />
               <input required type="text" name="business" placeholder="Business name" aria-label="Business name" />
@@ -629,16 +705,18 @@ function Contact() {
             </div>
             <select required name="industry" defaultValue="" aria-label="Industry">
               <option value="" disabled>Your industry…</option>
-              <option>Concrete &amp; Construction (Brampton &amp; GTA)</option>
+              <option>Concrete &amp; Construction</option>
               <option>Logistics &amp; Transportation</option>
               <option>Retail &amp; Restaurants</option>
               <option>Real Estate</option>
-              <option>Other Professional Services</option>
+              <option>Professional Services</option>
               <option>Other</option>
             </select>
-            <textarea required name="pain_point" placeholder="What eats the most of your time each week?" aria-label="Biggest time waster" />
-            <button className="send" type="submit">Book my free call &amp; grant check →</button>
-          </form>
+            <textarea required name="pain_point" placeholder="What eats the most of your week?" aria-label="Biggest time waster" />
+            <button className="send sheen" type="submit" disabled={status === 'sending'}>
+              {status === 'sending' ? 'Sending…' : 'Book my free call & grant check →'}
+            </button>
+          </Rv>
         )}
       </div>
     </section>
@@ -646,150 +724,213 @@ function Contact() {
 }
 
 /* ─────────────────────────────────────────────
-   SEO Regional Coverage & Service Hubs
+   Coverage
 ───────────────────────────────────────────── */
+const GEO = [
+  { c: '#3ddc97', h: 'Greater Toronto Area', p: 'Toronto, Brampton, Mississauga, Vaughan, Markham, Richmond Hill, Oakville, Burlington, Durham.' },
+  { c: '#45c4ff', h: 'Ontario tech corridor', p: 'Hamilton, Kitchener-Waterloo, Cambridge, Guelph, London, Barrie, Niagara, Ottawa.' },
+  { c: '#ffb199', h: 'Canada-wide, remote', p: 'Calgary, Edmonton, Vancouver, Victoria, Montreal, Winnipeg, Halifax — coast to coast.' },
+];
+
 function ServiceLocations() {
   return (
-    <section className="ch" id="locations" style={{ marginTop: 60, paddingTop: 40, borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-      <span className="chip"><i style={{ '--cc': 'var(--gA1)' }} />Canada-Wide AI Advisory</span>
-      <h2 style={{ fontSize: '1.8rem' }}>#1 AI Consulting &amp; Automation Firm in Toronto, GTA &amp; Canada</h2>
-      <p className="lead" style={{ fontSize: '1rem', maxWidth: 780, margin: '0 auto 24px' }}>
-        Based in Brampton and the Greater Toronto Area, <b>Flower City AI (flowercityai.ca)</b> helps Canadian business leaders implement high-ROI AI agents, automated operations, and hands-on staff training—part-funded by government grants.
-      </p>
-
-      <div className="cards" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 16, marginTop: 24 }}>
-        <div className="card glass" style={{ padding: '24px', textAlign: 'left' }}>
-          <h3 style={{ fontSize: '1.1rem', color: '#3ddc97', marginBottom: 8 }}>Greater Toronto Area (GTA) Hub</h3>
-          <p style={{ fontSize: '0.88rem', color: 'rgba(255,255,255,0.7)', lineHeight: '1.6' }}>
-            On-site &amp; remote AI consulting for businesses across Toronto, Brampton, Mississauga, Vaughan, Markham, Richmond Hill, Oakville, Burlington &amp; Durham Region.
-          </p>
-        </div>
-
-        <div className="card glass" style={{ padding: '24px', textAlign: 'left' }}>
-          <h3 style={{ fontSize: '1.1rem', color: '#45c4ff', marginBottom: 8 }}>Ontario &amp; Tech Corridor</h3>
-          <p style={{ fontSize: '0.88rem', color: 'rgba(255,255,255,0.7)', lineHeight: '1.6' }}>
-            Custom AI integrations &amp; COJG grant training for companies in Hamilton, Kitchener-Waterloo, Cambridge, Guelph, London, Barrie, Niagara &amp; Ottawa.
-          </p>
-        </div>
-
-        <div className="card glass" style={{ padding: '24px', textAlign: 'left' }}>
-          <h3 style={{ fontSize: '1.1rem', color: '#ffb199', marginBottom: 8 }}>National AI Advisory (Canada)</h3>
-          <p style={{ fontSize: '0.88rem', color: 'rgba(255,255,255,0.7)', lineHeight: '1.6' }}>
-            Serving clients across Alberta (Calgary, Edmonton), BC (Vancouver, Victoria), Quebec (Montreal), Manitoba, Nova Scotia &amp; coast-to-coast remote operations.
-          </p>
-        </div>
+    <section className="ch" id="locations">
+      <Head
+        cc="var(--gA1)"
+        chip="Coverage"
+        title="AI consulting across Toronto, the GTA & Canada."
+        lead="Brampton-based. On-site across the GTA, remote everywhere else."
+      />
+      <div className="geo-grid">
+        {GEO.map((g, i) => (
+          <Rv key={g.h} className="geo-card glass spot" d={i * 80} {...spotProps}>
+            <h3 style={{ color: g.c }}>{g.h}</h3>
+            <p>{g.p}</p>
+          </Rv>
+        ))}
       </div>
     </section>
   );
 }
 
 /* ─────────────────────────────────────────────
-   App Layout — Perfectly Formatted Navigation Bar
+   Nav links (single source of truth)
+───────────────────────────────────────────── */
+const NAV = [
+  { id: 'solutions', label: 'Problem' },
+  { id: 'industries', label: 'Industries' },
+  { id: 'funding', label: 'Grants' },
+  { id: 'services', label: 'Services' },
+  { id: 'locations', label: 'Coverage' },
+];
+
+/* ─────────────────────────────────────────────
+   App
 ───────────────────────────────────────────── */
 export default function App() {
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const [activeId, setActiveId] = useState('');
+  const barRef = useRef(null);
+  const glowRefs = [useRef(null), useRef(null), useRef(null), useRef(null)];
+  const reduced = useReducedMotion();
+
+  /* Scroll progress · nav condense · glow parallax — one rAF loop */
+  useEffect(() => {
+    let ticking = false;
+    const onScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        const y = window.scrollY;
+        const max = document.documentElement.scrollHeight - window.innerHeight;
+        if (barRef.current) barRef.current.style.setProperty('--p', max > 0 ? y / max : 0);
+        setScrolled(y > 24);
+        if (!reduced) {
+          glowRefs.forEach((r, i) => {
+            if (r.current) r.current.style.setProperty('--py', `${y * (0.06 + i * 0.035) * (i % 2 ? -1 : 1)}px`);
+          });
+        }
+        ticking = false;
+      });
+    };
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll);
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onScroll);
+    };
+  }, [reduced]);
+
+  /* Active nav link */
+  useEffect(() => {
+    if (!('IntersectionObserver' in window)) return;
+    const els = NAV.map((n) => document.getElementById(n.id)).filter(Boolean);
+    const obs = new IntersectionObserver(
+      (entries) => {
+        const visible = entries.filter((e) => e.isIntersecting)
+          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+        if (visible) setActiveId(visible.target.id);
+      },
+      { rootMargin: '-45% 0px -45% 0px', threshold: 0 }
+    );
+    els.forEach((el) => obs.observe(el));
+    return () => obs.disconnect();
+  }, []);
+
+  /* Lock scroll behind the mobile drawer */
+  useEffect(() => {
+    document.body.style.overflow = mobileNavOpen ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
+  }, [mobileNavOpen]);
+
+  const closeNav = useCallback(() => setMobileNavOpen(false), []);
 
   return (
-    <div className="canvas">
-      <div className="glow" style={{ top: -120, left: '8%', width: 420, height: 420, background: 'var(--gA3)' }} />
-      <div className="glow" style={{ top: 820, right: '4%', width: 380, height: 380, background: 'var(--gB1)' }} />
-      <div className="glow" style={{ top: 1900, left: '2%', width: 400, height: 400, background: 'var(--gC1)' }} />
-      <div className="glow" style={{ bottom: 400, right: '8%', width: 380, height: 380, background: 'var(--gD2)' }} />
+    <>
+      <div className="progress" ref={barRef} aria-hidden="true" />
+      <div className="bgfield" aria-hidden="true" />
+      <div className="grain" aria-hidden="true" />
 
-      {/* Balanced 3-Column Navigation Header */}
-      <nav className="nav">
-        <a href="#" className="brand-wrap">
-          <LogoMark size={32} />
-          <div className="brand-text">
-            <span className="brand-title">Flower City AI</span>
-            <span className="brand-sub">Toronto &amp; GTA · Canada</span>
+      <div className="canvas">
+        <div className="glow" ref={glowRefs[0]} style={{ top: -140, left: '6%', width: 440, height: 440, background: 'var(--gA3)' }} />
+        <div className="glow" ref={glowRefs[1]} style={{ top: 1100, right: '2%', width: 400, height: 400, background: 'var(--gB1)' }} />
+        <div className="glow" ref={glowRefs[2]} style={{ top: 2600, left: '0%', width: 420, height: 420, background: 'var(--gC1)' }} />
+        <div className="glow" ref={glowRefs[3]} style={{ top: 4200, right: '6%', width: 400, height: 400, background: 'var(--gD2)' }} />
+
+        <nav className={`nav ${scrolled ? 'scrolled' : ''}`}>
+          <a href="#" className="brand-wrap" aria-label="Flower City AI home">
+            <LogoMark size={30} />
+            <div className="brand-text">
+              <span className="brand-title">Flower City AI</span>
+              <span className="brand-sub">Toronto &amp; GTA · Canada</span>
+            </div>
+          </a>
+
+          <div className="links">
+            {NAV.map((n) => (
+              <a key={n.id} href={`#${n.id}`} className={activeId === n.id ? 'on' : ''}>{n.label}</a>
+            ))}
           </div>
-        </a>
 
-        <div className="links">
-          <a href="#solutions">Solutions</a>
-          <a href="#funding">Grants &amp; Funding</a>
-          <a href="#services">Services</a>
-          <a href="#locations">Coverage</a>
-        </div>
-
-        <div className="nav-right">
-          <a className="cta-s" href="#contact">Book a free call</a>
-          <button
-            className="mobile-nav-toggle"
-            aria-label="Toggle menu"
-            onClick={() => setMobileNavOpen(!mobileNavOpen)}
-          >
-            {mobileNavOpen ? '✕' : '☰'}
-          </button>
-        </div>
-      </nav>
-
-      {mobileNavOpen && (
-        <div className="mobile-drawer glass">
-          <a href="#solutions" onClick={() => setMobileNavOpen(false)}>Solutions</a>
-          <a href="#funding" onClick={() => setMobileNavOpen(false)}>Grants &amp; Funding</a>
-          <a href="#services" onClick={() => setMobileNavOpen(false)}>Services</a>
-          <a href="#locations" onClick={() => setMobileNavOpen(false)}>Coverage</a>
-          <a className="cta-s" href="#contact" onClick={() => setMobileNavOpen(false)}>Book a free call</a>
-        </div>
-      )}
-
-      {/* Hero Section */}
-      <header className="hero">
-        <div style={{ display: 'inline-block', marginBottom: 14 }}>
-          <LogoMark size={56} />
-        </div>
-
-        <div>
-          <div style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: 8,
-            background: 'rgba(61, 220, 151, 0.08)',
-            border: '1px solid rgba(61, 220, 151, 0.25)',
-            borderRadius: 20,
-            padding: '6px 14px',
-            fontSize: '0.85rem',
-            color: '#3ddc97',
-            fontWeight: 600,
-            marginBottom: 16
-          }}>
-            <span>🇨🇦</span> #1 AI Consulting &amp; Automation Agency in Toronto, GTA &amp; Canada
+          <div className="nav-right">
+            <a className="cta-s sheen" href="#contact">Book a free call</a>
+            <button
+              className="mobile-nav-toggle"
+              aria-label="Toggle menu"
+              aria-expanded={mobileNavOpen}
+              onClick={() => setMobileNavOpen((o) => !o)}
+            >
+              {mobileNavOpen ? '✕' : '☰'}
+            </button>
           </div>
-        </div>
+        </nav>
 
-        <h1>Your business, <span className="grad">running on autopilot.</span></h1>
-        <p className="sub">Practical AI that replies to customers, books jobs, and chases invoices — and a team that <b>teaches yours to run it.</b> Part-funded by Canadian government grants.</p>
-        <a className="cta" href="#contact">Book a free 30-min call &amp; grant check <span className="ico">→</span></a>
-        <span className="cta-sub">flowercityai.ca · No jargon · No pressure · Honest eligibility fit check</span>
-      </header>
+        {mobileNavOpen && (
+          <div className="mobile-drawer">
+            {NAV.map((n, i) => (
+              <a key={n.id} href={`#${n.id}`} style={{ '--i': i }} onClick={closeNav}>{n.label}</a>
+            ))}
+            <a className="cta-s" href="#contact" style={{ '--i': NAV.length }} onClick={closeNav}>Book a free call</a>
+          </div>
+        )}
 
-      <Meters />
-      <USPSection />
-      <DemoStage />
-      <IndustrySolutions />
-      <Education />
-      <Services />
-      <Funding />
-      <FAQ />
-      <Contact />
-      <ServiceLocations />
+        <header className="hero">
+          <div className="hero-logo hero-fade" style={{ display: 'inline-block', marginBottom: 14, '--d': '0ms' }}>
+            <LogoMark size={54} />
+          </div>
 
-      <footer>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, marginBottom: 10 }}>
-          <LogoMark size={28} />
-          <b style={{ fontSize: 16, color: '#fff' }}>Flower City AI | flowercityai.ca</b>
-        </div>
-        Toronto &amp; GTA-born · #1 AI Consulting &amp; Automation Agency serving all of Canada · © {new Date().getFullYear()}
-        <div className="flinks">
-          <a href="#solutions">Solutions</a>
-          <a href="#funding">Grants &amp; Funding</a>
-          <a href="#services">Services</a>
-          <a href="#locations">Coverage</a>
-          <a href="#contact">Contact</a>
-        </div>
-      </footer>
-    </div>
+          <div>
+            <span className="hero-badge hero-fade" style={{ '--d': '80ms' }}>
+              <span className="pulse" />AI consulting · Toronto · GTA · Canada 🇨🇦
+            </span>
+          </div>
+
+          <h1>
+            <Words text="Your business," start={0} />{' '}
+            <span className="w"><i className="grad" style={{ '--i': 2 }}>running on autopilot.</i></span>
+          </h1>
+
+          <p className="sub hero-fade" style={{ '--d': '520ms' }}>
+            AI that answers customers, books jobs and chases invoices. We train your team to run it —
+            and <b>grants cover most of the cost.</b>
+          </p>
+
+          <a className="cta sheen hero-fade" href="#contact" style={{ '--d': '620ms' }}>
+            Book a free call &amp; grant check <span className="ico">→</span>
+          </a>
+          <span className="cta-sub hero-fade" style={{ '--d': '700ms' }}>
+            30 minutes · No jargon · Honest eligibility check
+          </span>
+
+          <a className="scroll-cue" href="#solutions" aria-label="Scroll to content"><i /></a>
+        </header>
+
+        <Meters />
+        <Marquee />
+        <USPSection />
+        <DemoStage />
+        <IndustrySolutions />
+        <Education />
+        <Services />
+        <Funding />
+        <FAQ />
+        <Contact />
+        <ServiceLocations />
+
+        <footer>
+          <div className="fbrand">
+            <LogoMark size={26} />
+            <b>Flower City AI</b>
+          </div>
+          AI consulting, automation &amp; training · Brampton &amp; the GTA, serving all of Canada · © {new Date().getFullYear()}
+          <div className="flinks">
+            {NAV.map((n) => <a key={n.id} href={`#${n.id}`}>{n.label}</a>)}
+            <a href="#contact">Contact</a>
+          </div>
+        </footer>
+      </div>
+    </>
   );
 }
