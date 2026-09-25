@@ -42,3 +42,6 @@ Thumbs.db
 # Temporary / Cache directories
 .cache/
 .eslintcache
+
+# Generated website output
+/dist/
