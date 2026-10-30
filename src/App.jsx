@@ -195,66 +195,6 @@ export default function App() {
     return () => { chapters.disconnect(); stops.disconnect(); };
   }, []);
 
-  // Chapter stops: one wheel flick or key press glides to the next chapter and pauses there.
-  // Touch and scrollbar dragging stay native (CSS proximity snapping handles those).
-  useEffect(() => {
-    if (!window.matchMedia('(pointer: fine)').matches) return;
-    const reduced = prefersReduced();
-    let busy = false, until = 0, carry = 0;
-    const stops = () => [...document.querySelectorAll('[data-chapter]')];
-    const current = () => {
-      const middle = window.innerHeight / 2;
-      return stops().findIndex(el => { const r = el.getBoundingClientRect(); return r.top <= middle && r.bottom > middle; });
-    };
-    const glide = (to) => {
-      const start = window.scrollY, distance = to - start, duration = reduced ? 0 : 1100;
-      if (Math.abs(distance) < 2) return;
-      busy = true;
-      const began = performance.now();
-      const step = (now) => {
-        const t = duration ? Math.min(1, (now - began) / duration) : 1;
-        const eased = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
-        window.scrollTo({ top: start + distance * eased, behavior: 'instant' });
-        if (t < 1) requestAnimationFrame(step);
-        else { busy = false; until = performance.now() + 450; carry = 0; }
-      };
-      requestAnimationFrame(step);
-    };
-    const go = (direction) => {
-      const list = stops(), index = current();
-      if (index < 0) return false;
-      const section = list[index].getBoundingClientRect();
-      // A chapter taller than the screen (e.g. an open FAQ) scrolls normally until its edge.
-      if (direction > 0 && section.bottom > window.innerHeight + 4) return false;
-      if (direction < 0 && section.top < -4) return false;
-      const next = list[index + direction];
-      if (!next) return false;
-      document.documentElement.dataset.dir = direction > 0 ? 'down' : 'up';
-      glide(window.scrollY + next.getBoundingClientRect().top);
-      return true;
-    };
-    const blocked = () => document.documentElement.classList.contains('is-gated') || document.getElementById('mobile-menu');
-    const wheel = (event) => {
-      if (event.ctrlKey || blocked()) return;
-      if (busy || performance.now() < until) { event.preventDefault(); return; }
-      carry += event.deltaY;
-      if (Math.abs(carry) < 24) { event.preventDefault(); return; }
-      if (go(Math.sign(carry))) event.preventDefault();
-      carry = 0;
-    };
-    const key = (event) => {
-      if (blocked() || event.target.closest('input,textarea,select,[contenteditable]')) return;
-      const down = ['PageDown', 'ArrowDown', ' '].includes(event.key) && !event.shiftKey;
-      const up = ['PageUp', 'ArrowUp'].includes(event.key) || (event.key === ' ' && event.shiftKey);
-      if (!down && !up) return;
-      if (busy) { event.preventDefault(); return; }
-      if (go(down ? 1 : -1)) event.preventDefault();
-    };
-    window.addEventListener('wheel', wheel, { passive: false });
-    window.addEventListener('keydown', key);
-    return () => { window.removeEventListener('wheel', wheel); window.removeEventListener('keydown', key); };
-  }, []);
-
   useEffect(() => {
     if (!menuOpen) return;
     const key = (event) => { if (event.key === 'Escape') setMenuOpen(false); };
